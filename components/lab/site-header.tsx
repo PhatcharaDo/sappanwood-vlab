@@ -8,39 +8,39 @@ export function SiteHeader() {
 
   return (
     <>
-      <header className="border-b border-border bg-card/60 backdrop-blur sticky top-0 z-50">
-        <div className="mx-auto flex max-w-7xl flex-row items-center justify-between gap-4 px-4 py-4 md:px-6">
-          {/* ฝั่งซ้าย: โลโก้ + ข้อความหัวข้อสไตล์ดั้งเดิมที่อ่านง่ายและชัดเจน */}
-          <div className="flex items-center gap-4 min-w-0 flex-1">
+      <header className="border-b border-border bg-card/80 backdrop-blur sticky top-0 z-50">
+        <div className="mx-auto flex max-w-7xl flex-col md:flex-row md:items-center md:justify-between gap-3 px-4 py-3.5 md:px-6">
+          {/* ฝั่งซ้าย: โลโก้ + ชื่อหัวข้อ (เต็มความกว้างบนมือถือ ไม่ถูกบีบ) */}
+          <div className="flex items-center gap-3.5 min-w-0 w-full md:w-auto md:flex-1">
             <div
               role="img"
               aria-label="ตราสัญลักษณ์โรงเรียน"
-              className="flex size-14 shrink-0 items-center justify-center rounded-full border-2 border-primary bg-background shadow-[0_0_4px_rgba(250,204,21,0.3)]"
+              className="flex size-12 sm:size-14 shrink-0 items-center justify-center rounded-full border-2 border-primary bg-background shadow-[0_0_4px_rgba(250,204,21,0.3)]"
             >
-              <Shield className="size-7 text-primary" aria-hidden="true" />
+              <Shield className="size-6 sm:size-7 text-primary" aria-hidden="true" />
             </div>
-            <div className="min-w-0">
-              <p className="text-pretty text-sm sm:text-base font-semibold leading-snug text-primary">
+            <div className="min-w-0 flex-1">
+              <p className="text-pretty text-xs sm:text-sm md:text-base font-semibold leading-snug text-primary">
                 สื่อการเรียนรู้ห้องปฏิบัติการเสมือน (Virtual Lab) - โรงเรียนหาดใหญ่วิทยาลัยสมบูรณ์กุลกันยา
               </p>
-              <h1 className="text-pretty text-sm leading-snug text-foreground">
+              <h1 className="text-pretty text-[11px] sm:text-xs md:text-sm leading-snug text-foreground mt-0.5">
                 ชุดกระดาษทดสอบจำแนกความเข้มข้นของสารด้วยระยะทางการเคลื่อนที่บนกระดาษจากสารสกัดแก่นฝาง
               </h1>
             </div>
           </div>
 
-          {/* ฝั่งขวา: ปุ่ม Green & Microscale Chemistry แบบไม่มีรูป มีคำว่า (คลิกอ่าน) ขีดเส้นใต้ด้านล่าง */}
-          <ul className="flex shrink-0 items-center gap-2 sm:gap-3" aria-label="แนวคิดหลัก">
+          {/* ฝั่งขวา: ปุ่ม Green & Microscale Chemistry จัดเรียงสวยงามบนมือถือและเดสก์ท็อป */}
+          <ul className="flex flex-row items-center justify-end gap-2.5 w-full md:w-auto shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-800/80" aria-label="แนวคิดหลัก">
             <li>
               <button
                 onClick={() => setActiveModal('green')}
-                className="group flex flex-col items-center justify-center rounded-full border border-success/40 bg-success/10 px-4 py-1.5 text-xs font-medium text-success transition-all hover:bg-success/20 hover:scale-105 active:scale-95 cursor-pointer whitespace-nowrap shadow-sm"
+                className="group flex flex-col items-center justify-center rounded-full border border-success/40 bg-success/10 px-3.5 py-1 text-[11px] sm:text-xs font-medium text-success transition-all hover:bg-success/20 hover:scale-105 active:scale-95 cursor-pointer whitespace-nowrap shadow-sm"
               >
                 <span className="inline-flex items-center gap-1.5">
                   <Leaf className="size-3.5" aria-hidden="true" />
                   Green Chemistry
                 </span>
-                <span className="text-[10px] text-success/80 underline underline-offset-2 font-normal group-hover:text-success">
+                <span className="text-[9px] sm:text-[10px] text-success/80 underline underline-offset-2 font-normal group-hover:text-success">
                   (คลิกอ่าน)
                 </span>
               </button>
@@ -48,13 +48,13 @@ export function SiteHeader() {
             <li>
               <button
                 onClick={() => setActiveModal('micro')}
-                className="group flex flex-col items-center justify-center rounded-full border border-primary/40 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary transition-all hover:bg-primary/20 hover:scale-105 active:scale-95 cursor-pointer whitespace-nowrap shadow-sm"
+                className="group flex flex-col items-center justify-center rounded-full border border-primary/40 bg-primary/10 px-3.5 py-1 text-[11px] sm:text-xs font-medium text-primary transition-all hover:bg-primary/20 hover:scale-105 active:scale-95 cursor-pointer whitespace-nowrap shadow-sm"
               >
                 <span className="inline-flex items-center gap-1.5">
                   <FlaskConical className="size-3.5" aria-hidden="true" />
                   Microscale Chemistry
                 </span>
-                <span className="text-[10px] text-primary/80 underline underline-offset-2 font-normal group-hover:text-primary">
+                <span className="text-[9px] sm:text-[10px] text-primary/80 underline underline-offset-2 font-normal group-hover:text-primary">
                   (คลิกอ่าน)
                 </span>
               </button>
