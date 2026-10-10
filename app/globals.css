@@ -1,0 +1,136 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: var(--font-plex-thai), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), var(--font-plex-thai), ui-monospace, monospace;
+  --color-success: var(--success);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+}
+
+:root {
+  color-scheme: dark;
+  --background: #0a192f;
+  --foreground: #e6edf7;
+  --card: #172a45;
+  --card-foreground: #e6edf7;
+  --popover: #172a45;
+  --popover-foreground: #e6edf7;
+  --primary: #facc15;
+  --primary-foreground: #0a192f;
+  --secondary: #1f3a5f;
+  --secondary-foreground: #e6edf7;
+  --muted: #12233d;
+  --muted-foreground: #9fb0c8;
+  --accent: #1f3a5f;
+  --accent-foreground: #e6edf7;
+  --destructive: #f87171;
+  --success: #4ade80;
+  --border: #27446e;
+  --input: #27446e;
+  --ring: #facc15;
+  --radius: 0.75rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+}
+
+@keyframes migrate {
+  from {
+    height: 0;
+  }
+}
+
+@keyframes stir {
+  0%,
+  100% {
+    transform: rotate(-14deg);
+  }
+  50% {
+    transform: rotate(14deg);
+  }
+}
+
+@keyframes drip {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(46px);
+    opacity: 0;
+  }
+}
+
+@keyframes drop-fall {
+  0% {
+    transform: translateY(-36px);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+}
+
+@utility animate-migrate {
+  animation: migrate 2.6s cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+
+@utility animate-stir {
+  animation: stir 0.6s ease-in-out infinite;
+}
+
+@utility animate-drip {
+  animation: drip 0.9s ease-in infinite;
+}
+
+@utility animate-drop-fall {
+  animation: drop-fall 0.7s ease-in forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-migrate,
+  .animate-stir,
+  .animate-drip,
+  .animate-drop-fall {
+    animation: none;
+  }
+}
