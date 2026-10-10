@@ -8,8 +8,8 @@ export function SiteHeader() {
 
   return (
     <>
-      {/* ใช้ fixed เพื่อตรึงนิ่งอยู่กับที่ถาวร ไม่เลื่อนตามการ scroll หน้าจอ */}
-      <header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-slate-950/95 backdrop-blur-md shadow-lg">
+      {/* ใช้ sticky top-0 พร้อมสีพื้นหลังเดิม (bg-card/80 และ backdrop-blur) เพื่อตรึงนิ่งติดขอบบนสุดและเข้ากับธีมเว็บ */}
+      <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-md shadow-sm">
         <div className="mx-auto flex max-w-7xl flex-col md:flex-row md:items-center md:justify-between gap-3 px-4 py-3 md:px-6">
           {/* ฝั่งซ้าย: โลโก้ + ชื่อหัวข้อขนาดใหญ่อ่านง่าย */}
           <div className="flex items-center gap-3.5 min-w-0 w-full md:w-auto md:flex-1">
@@ -31,7 +31,7 @@ export function SiteHeader() {
           </div>
 
           {/* ฝั่งขวา: ปุ่ม Green & Microscale Chemistry */}
-          <ul className="flex flex-row items-center justify-end gap-2.5 w-full md:w-auto shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-800/80" aria-label="แนวคิดหลัก">
+          <ul className="flex flex-row items-center justify-end gap-2.5 w-full md:w-auto shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-border/60" aria-label="แนวคิดหลัก">
             <li>
               <button
                 onClick={() => setActiveModal('green')}
@@ -63,9 +63,6 @@ export function SiteHeader() {
           </ul>
         </div>
       </header>
-
-      {/* เพิ่มช่องว่างด้านบน (Spacer) เพื่อไม่ให้เนื้อหาด้านล่างถูก Header บังตอนแสดงผล */}
-      <div className="pt-[115px] md:pt-[80px]" />
 
       {/* Modal: Green Chemistry (12 Principles) */}
       {activeModal === 'green' && (
