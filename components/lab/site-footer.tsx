@@ -4,7 +4,7 @@ export function SiteFooter() {
       <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-5 text-xs text-muted-foreground md:px-6 md:text-sm">
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <p className="text-pretty">
-            สื่อการเรียนรู้ห้องปฏิบัติการเสมือน (Virtual Lab) - การประกวดโครงโครงการเคมีแบบย่อส่วน รางวัล DOW-CST Award ประจำปี พ.ศ. 2569
+            สื่อการเรียนรู้ห้องปฏิบัติการเสมือน (Virtual Lab) - การประกวดโครงการเคมีแบบย่อส่วน รางวัล DOW-CST Award ประจำปี พ.ศ. 2569
           </p>
           <p className="shrink-0 font-medium text-primary">
             Hatyaiwittayalaisomboonkulkanya School
