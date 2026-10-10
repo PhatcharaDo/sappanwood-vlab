@@ -1,59 +1,69 @@
 'use client'
 
 import { useState } from 'react'
-import { FlaskConical, Leaf, Shield, X, CheckCircle2 } from 'lucide-react'
+import { FlaskConical, Leaf, Shield, X, CheckCircle2, BookOpen } from 'lucide-react'
 
 export function SiteHeader() {
   const [activeModal, setActiveModal] = useState<'green' | 'micro' | null>(null)
 
   return (
     <>
-      <header className="border-b border-border bg-card/60 backdrop-blur sticky top-0 z-50">
-        <div className="mx-auto flex max-w-7xl flex-row items-center justify-between gap-3 px-3 py-3 md:px-6">
-          {/* โลโก้และชื่อหัวข้อ */}
-          <div className="flex items-center gap-3 min-w-0 flex-1">
+      <header className="border-b border-border bg-card/80 backdrop-blur sticky top-0 z-50">
+        <div className="mx-auto flex max-w-7xl flex-row items-center justify-between gap-3 px-3 py-3.5 md:px-6">
+          {/* โลโก้และชื่อหัวข้อ (ขยายให้ใหญ่และเด่นชัดขึ้น) */}
+          <div className="flex items-center gap-3.5 min-w-0 flex-1">
             <div
               role="img"
               aria-label="ตราสัญลักษณ์โรงเรียน"
-              className="flex size-10 sm:size-14 shrink-0 items-center justify-center rounded-full border-2 border-primary bg-background shadow-[0_0_4px_rgba(250,204,21,0.3)]"
+              className="flex size-11 sm:size-14 shrink-0 items-center justify-center rounded-full border-2 border-primary bg-background shadow-[0_0_8px_rgba(250,204,21,0.4)]"
             >
-              <Shield className="size-5 sm:size-7 text-primary" aria-hidden="true" />
+              <Shield className="size-6 sm:size-7 text-primary" aria-hidden="true" />
             </div>
             <div className="min-w-0 flex-1 truncate">
-              <p className="text-pretty text-xs sm:text-sm font-semibold leading-snug text-primary truncate">
+              <p className="text-pretty text-sm sm:text-base font-bold leading-tight text-primary truncate">
                 สื่อการเรียนรู้ห้องปฏิบัติการเสมือน (Virtual Lab) - โรงเรียนหาดใหญ่วิทยาลัยสมบูรณ์กุลกันยา
               </p>
-              <h1 className="text-pretty text-[11px] sm:text-sm leading-snug text-foreground truncate">
+              <h1 className="text-pretty text-xs sm:text-sm font-medium leading-snug text-foreground/90 truncate mt-0.5">
                 ชุดกระดาษทดสอบจำแนกความเข้มข้นของสารด้วยระยะทางการเคลื่อนที่บนกระดาษจากสารสกัดแก่นฝาง
               </h1>
             </div>
           </div>
 
-          {/* ปุ่ม Green & Microscale Chemistry */}
-          <ul className="flex shrink-0 items-center gap-1.5 sm:gap-2" aria-label="แนวคิดหลัก">
+          {/* ปุ่ม Green & Microscale Chemistry (เพิ่มไอคอนหนังสือและป้ายบอกให้รู้ว่ากดอ่านได้ชัดเจนขึ้น) */}
+          <ul className="flex shrink-0 items-center gap-2 sm:gap-3" aria-label="แนวคิดหลัก">
             <li>
               <button
                 onClick={() => setActiveModal('green')}
-                className="inline-flex items-center gap-1.5 rounded-full border border-success/40 bg-success/10 px-2.5 py-1 text-[10px] sm:text-xs font-medium text-success transition-all hover:bg-success/25 hover:scale-105 active:scale-95 cursor-pointer whitespace-nowrap shadow-sm"
+                className="group inline-flex items-center gap-2 rounded-xl border border-success/50 bg-success/15 px-3 py-1.5 text-xs sm:text-sm font-semibold text-success transition-all hover:bg-success/25 hover:scale-105 active:scale-95 cursor-pointer whitespace-nowrap shadow-md shadow-success/10"
               >
-                <Leaf className="size-3.5" aria-hidden="true" />
-                Green Chemistry
+                <Leaf className="size-4 group-hover:rotate-12 transition-transform" aria-hidden="true" />
+                <span className="flex items-center gap-1">
+                  Green Chemistry
+                  <span className="hidden md:inline-flex items-center gap-0.5 text-[10px] bg-success/30 px-1.5 py-0.5 rounded text-white ml-1">
+                    <BookOpen className="size-3" /> คลิกอ่าน
+                  </span>
+                </span>
               </button>
             </li>
             <li>
               <button
                 onClick={() => setActiveModal('micro')}
-                className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-[10px] sm:text-xs font-medium text-primary transition-all hover:bg-primary/25 hover:scale-105 active:scale-95 cursor-pointer whitespace-nowrap shadow-sm"
+                className="group inline-flex items-center gap-2 rounded-xl border border-primary/50 bg-primary/15 px-3 py-1.5 text-xs sm:text-sm font-semibold text-primary transition-all hover:bg-primary/25 hover:scale-105 active:scale-95 cursor-pointer whitespace-nowrap shadow-md shadow-primary/10"
               >
-                <FlaskConical className="size-3.5" aria-hidden="true" />
-                Microscale Chemistry
+                <FlaskConical className="size-4 group-hover:-rotate-12 transition-transform" aria-hidden="true" />
+                <span className="flex items-center gap-1">
+                  Microscale Chemistry
+                  <span className="hidden md:inline-flex items-center gap-0.5 text-[10px] bg-primary/30 px-1.5 py-0.5 rounded text-white ml-1">
+                    <BookOpen className="size-3" /> คลิกอ่าน
+                  </span>
+                </span>
               </button>
             </li>
           </ul>
         </div>
       </header>
 
-      {/* Modal: Green Chemistry (12 Principles) - ปรับปรุงตัวอักษรอ่านง่าย */}
+      {/* Modal: Green Chemistry (12 Principles) */}
       {activeModal === 'green' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 sm:p-5 backdrop-blur-md animate-in fade-in duration-200">
           <div className="relative w-full max-w-2xl max-h-[85vh] flex flex-col rounded-2xl border border-success/40 bg-slate-950 shadow-2xl text-slate-100 overflow-hidden">
@@ -76,7 +86,7 @@ export function SiteHeader() {
               </button>
             </div>
 
-            {/* Content Body (Scrollable) */}
+            {/* Content Body */}
             <div className="p-4 sm:p-6 overflow-y-auto space-y-4 text-sm text-slate-200 leading-relaxed">
               <p className="text-sm sm:text-base font-medium text-slate-100 bg-slate-900/60 p-3.5 rounded-xl border border-slate-800">
                 <strong className="text-success">เคมีสีเขียว (Green Chemistry)</strong> คือแนวทางการออกแบบผลิตภัณฑ์และกระบวนการทางเคมีเพื่อลดหรือกำจัดสารอันตราย โดยยึดหลักสำคัญ 12 ประการ ดังนี้:
@@ -148,7 +158,7 @@ export function SiteHeader() {
         </div>
       )}
 
-      {/* Modal: Microscale Chemistry - ปรับปรุงตัวอักษรอ่านง่าย */}
+      {/* Modal: Microscale Chemistry */}
       {activeModal === 'micro' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 sm:p-5 backdrop-blur-md animate-in fade-in duration-200">
           <div className="relative w-full max-w-xl max-h-[85vh] flex flex-col rounded-2xl border border-primary/40 bg-slate-950 shadow-2xl text-slate-100 overflow-hidden">
@@ -171,7 +181,7 @@ export function SiteHeader() {
               </button>
             </div>
 
-            {/* Content Body (Scrollable) */}
+            {/* Content Body */}
             <div className="p-4 sm:p-6 overflow-y-auto space-y-4 text-sm sm:text-base text-slate-200 leading-relaxed">
               <p className="text-sm sm:text-base font-normal text-slate-200 leading-relaxed bg-slate-900/60 p-3.5 rounded-xl border border-slate-800">
                 <strong className="text-primary font-semibold">เคมีแบบย่อส่วน (Microscale Chemistry)</strong> คือแนวคิดและเทคนิคในการทำปฏิบัติการทางเคมีโดยลดขนาดปริมาณสารเคมี อุปกรณ์ และเครื่องมือลงให้เหลือน้อยที่สุด (ระดับมิลลิลิตร หยด หรือไมโครลิตร) โดยยังคงให้ผลการทดลองที่ถูกต้องแม่นยำ
