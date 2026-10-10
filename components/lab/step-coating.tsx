@@ -216,24 +216,3 @@ function CoatingSet({ set, locked, done, onComplete }: CoatingSetProps) {
               </span>{' '}
               {totalDrops === 0
                 ? '— หยดสารสกัดและรีเอเจนต์สลับกันให้สะสมครบอย่างละ 20 หยด'
-                : balanced
-                  ? `— ครบอัตราส่วน 1:1 (อย่างละ 1 mL) แล้ว สารละลายเปลี่ยนเป็น${set === 'A' ? 'สีแดง' : 'สีเหลือง'}`
-                  : '— กำลังผสม (หยดสลับสะสมให้ครบอย่างละ 20 หยด)'}
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <Button size="lg" onClick={() => setPhase('coat')} disabled={!balanced || locked}>
-                ยืนยันสารละลาย
-              </Button>
-              <Button size="lg" variant="outline" onClick={resetMix} disabled={locked || totalDrops === 0}>
-                <RotateCcw aria-hidden="true" />
-                เทผสมใหม่
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {phase === 'coat' && (
-        <div className="flex flex-col gap-4">
-          <p className="text-sm text-muted-foreground">คลิกที่กระดาษแต่ละแผ่นเพื่อจุ่ม/เคลือบด้วยสารละลาย (ครบ 5 แผ่น)</p>
-          <div className="flex items-
