@@ -12,7 +12,6 @@ import { Notice, Panel, ProgressBar, StepHeading } from './lab-ui'
 const MIN_DROPS = 3
 const STRIP_COUNT = 5
 
-// กำหนดสีเริ่มต้นของสารสกัดแก่นฝางเป็นสีน้ำตาลธรรมชาติ
 const BROWN_EXTRACT_COLOR = '#8B5A2B'
 
 type Props = {
@@ -27,7 +26,7 @@ export function StepCoating({ done, onSetComplete, onNext }: Props) {
       <StepHeading
         step={2}
         title="เคลือบกระดาษ µPADs (Set A & Set B)"
-        subtitle="ผสมสารสกัดแก่นฝางสีน้ำตาลกับเบสหรือกรดในอัตราส่วน 1:1 เพื่อเตรียมกระดาษทดสอบ 2 ชุด ชุดละ 5 แผ่น โดยต้องทำ Set A ให้เสร็จก่อนจึงจะปลดล็อก Set B"
+        subtitle="ผสมสารสกัดแก่นฝางกับเบสหรือกรดในอัตราส่วน 1:1 เพื่อเตรียมกระดาษทดสอบ 2 ชุด ชุดละ 5 แผ่น โดยต้องทำ Set A ให้เสร็จก่อนจึงจะปลดล็อก Set B"
       />
       <div className="grid gap-6 xl:grid-cols-2">
         <CoatingSet set="A" locked={false} done={done.A} onComplete={() => onSetComplete('A')} />
@@ -120,7 +119,7 @@ function CoatingSet({ set, locked, done, onComplete }: CoatingSetProps) {
             {info.title} <span className="text-primary">· {info.purpose}</span>
           </h3>
           <p className="text-sm text-muted-foreground">
-            สารสกัดสีน้ำตาล + {info.mixReagent} (1:1) → {info.paperName}
+            สารสกัด + {info.mixReagent} (1:1) → {info.paperName}
           </p>
         </div>
         <span
@@ -150,7 +149,6 @@ function CoatingSet({ set, locked, done, onComplete }: CoatingSetProps) {
 
       {phase === 'mix' && (
         <div className="relative grid gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] sm:items-center">
-          {/* อนิเมชั่นดอปเปอร์หยดสาร */}
           {dropping && (
             <div className="absolute top-4 left-1/4 z-20 flex flex-col items-center animate-bounce">
               <Pipette className="size-8 text-primary drop-shadow-[0_0_6px_rgba(250,204,21,0.8)] rotate-180" />
@@ -166,19 +164,19 @@ function CoatingSet({ set, locked, done, onComplete }: CoatingSetProps) {
           />
           <div className="flex flex-col gap-3">
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="secondary" size="lg" onClick={addExtractDrop} disabled={locked || dropping !== null} className="cursor-pointer">
+              <Button variant="secondary" size="lg" onClick={addExtractDrop} disabled={locked || dropping !== null}>
                 <Pipette aria-hidden="true" />
-                สารสกัด (ดอปเปอร์)
+                สารสกัด
               </Button>
-              <Button variant="secondary" size="lg" onClick={addReagentDrop} disabled={locked || dropping !== null} className="cursor-pointer">
+              <Button variant="secondary" size="lg" onClick={addReagentDrop} disabled={locked || dropping !== null}>
                 <Pipette aria-hidden="true" />
-                {info.mixReagent} (ดอปเปอร์)
+                {info.mixReagent}
               </Button>
             </div>
             <dl className="grid grid-cols-2 gap-2 text-center">
               <div className="rounded-lg border border-border bg-muted p-2">
-                <dt className="text-[11px] text-muted-foreground">สารสกัดสีน้ำตาล</dt>
-                <dd className="font-mono text-lg font-semibold text-amber-500">{extractDrops}</dd>
+                <dt className="text-[11px] text-muted-foreground">สารสกัด</dt>
+                <dd className="font-mono text-lg font-semibold text-primary">{extractDrops}</dd>
               </div>
               <div className="rounded-lg border border-border bg-muted p-2">
                 <dt className="text-[11px] text-muted-foreground">{info.mixReagent}</dt>
@@ -191,7 +189,7 @@ function CoatingSet({ set, locked, done, onComplete }: CoatingSetProps) {
                 {extractDrops}:{reagentDrops}
               </span>{' '}
               {totalDrops === 0
-                ? `— ใช้ดอปเปอร์หยดสารอย่างละอย่างน้อย ${MIN_DROPS} หยด`
+                ? `— หยดสารอย่างละอย่างน้อย ${MIN_DROPS} หยด`
                 : balanced
                   ? `— 1:1 แล้ว สารละลายเปลี่ยนเป็น${set === 'A' ? 'สีแดง' : 'สีเหลือง'}`
                   : extractDrops !== reagentDrops
@@ -213,7 +211,7 @@ function CoatingSet({ set, locked, done, onComplete }: CoatingSetProps) {
 
       {phase === 'coat' && (
         <div className="flex flex-col gap-4">
-          <p className="text-sm text-muted-foreground">ใช้ดอปเปอร์คลิกที่กระดาษแต่ละแผ่นเพื่อหยดเคลือบด้วยสารละลาย (ครบ 5 แผ่น)</p>
+          <p className="text-sm text-muted-foreground">คลิกที่กระดาษแต่ละแผ่นเพื่อจุ่ม/เคลือบด้วยสารละลาย (ครบ 5 แผ่น)</p>
           <div className="flex items-end justify-center gap-4 rounded-xl bg-muted p-5">
             {coated.map((isCoated, i) => (
               <button
@@ -223,7 +221,7 @@ function CoatingSet({ set, locked, done, onComplete }: CoatingSetProps) {
                 disabled={isCoated}
                 aria-label={`เคลือบกระดาษแผ่นที่ ${i + 1}${isCoated ? ' (เคลือบแล้ว)' : ''}`}
                 className={cn(
-                  'flex h-32 w-8 items-end justify-center rounded-sm border pb-1 font-mono text-[10px] transition-colors duration-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring cursor-pointer',
+                  'flex h-32 w-8 items-end justify-center rounded-sm border pb-1 font-mono text-[10px] transition-colors duration-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
                   isCoated ? 'border-transparent text-white/80' : 'border-border bg-[#f5f1e8] text-slate-500 hover:ring-2 hover:ring-primary',
                 )}
                 style={isCoated ? { backgroundColor: info.paperColor, color: set === 'B' ? '#5b4300' : undefined } : undefined}
@@ -324,7 +322,7 @@ function solutionColor(set: SetId, extract: number, reagent: number) {
   if (extract === 0) return '#e3ecf6'
   const info = SET_INFO[set]
   const target = info.paperColor
-  if (reagent === 0) return BROWN_EXTRACT_COLOR // เริ่มต้นด้วยสีน้ำตาลธรรมชาติของแก่นฝาง
+  if (reagent === 0) return BROWN_EXTRACT_COLOR
   if (reagent > extract) {
     return mixHex(target, info.overshootColor, Math.min(1, (reagent - extract) / extract))
   }
