@@ -10,8 +10,8 @@ import { BeakerGraphic, FilterSetupGraphic } from './glassware'
 import { Notice, Panel, ProcedureList, ProgressBar, StepHeading } from './lab-ui'
 
 const PROCEDURE = [
-  'ใส่ผงแก่นฝาง 1.0 g ลงในบีกเกอร์ขนาด 100 mL (คลิกหรือลากผงแก่นฝางไปที่บีกเกอร์)',
-  'เทเอทานอล 75% V/V ปริมาตร 5 mL ลงในบีกเกอร์ (คลิกหรือลากขวดเอทานอล)',
+  'ใส่ผงแก่นฝาง 20.0 g ลงในบีกเกอร์ขนาด 100 mL (คลิกหรือลากผงแก่นฝางไปที่บีกเกอร์)',
+  'เทเอทานอล 75% V/V ปริมาตร 20 mL ลงในบีกเกอร์ (คลิกหรือลากขวดเอทานอล)',
   'ใช้แท่งแก้วคนสาร คนให้เข้ากันเป็นเวลา 30 วินาที',
   'ทิ้งไว้ 1 วัน (Resting 1 day)',
   'เทกรองผ่านกรวยกรองและกระดาษกรอง จนกรองเสร็จ',
@@ -37,7 +37,7 @@ export function StepExtraction({ done, onComplete, onNext }: Props) {
     onComplete()
   })
 
-  const ethanolMl = stage >= 2 ? 5 : pour.progress * 5
+  const ethanolMl = stage >= 2 ? 20 : pour.progress * 20
   const stirSeconds = stage >= 3 ? 30 : stir.progress * 30
   const restHours = stage >= 4 ? 24 : rest.progress * 24
   const filterProgress = stage >= 5 ? 1 : filter.progress
@@ -93,7 +93,7 @@ export function StepExtraction({ done, onComplete, onNext }: Props) {
                 onClick={addPowder}
                 swatch={<span className="size-6 rounded-md bg-[#7a3e1d] shadow-inner" />}
                 name="ผงแก่นฝาง"
-                detail="1.0 g"
+                detail="20.0 g"
               />
               <EquipmentCard
                 dragId="ethanol"
@@ -102,7 +102,7 @@ export function StepExtraction({ done, onComplete, onNext }: Props) {
                 onClick={addEthanol}
                 swatch={<Droplets className="size-6 text-[#bcd3ee]" aria-hidden="true" />}
                 name="เอทานอล 75% V/V"
-                detail="5 mL"
+                detail="20 mL"
               />
             </div>
           </div>
@@ -115,7 +115,7 @@ export function StepExtraction({ done, onComplete, onNext }: Props) {
             )}
             {(pour.running || stage === 2) && (
               <>
-                <ProgressBar value={stage >= 2 && !pour.running ? stir.progress : pour.progress} label={pour.running ? `กำลังเทเอทานอล ${ethanolMl.toFixed(1)} / 5.0 mL` : `คนสาร ${stirSeconds.toFixed(0)} / 30 วินาที (จำลองเวลา)`} />
+                <ProgressBar value={stage >= 2 && !pour.running ? stir.progress : pour.progress} label={pour.running ? `กำลังเทเอทานอล ${ethanolMl.toFixed(1)} / 20.0 mL` : `คนสาร ${stirSeconds.toFixed(0)} / 30 วินาที (จำลองเวลา)`} />
                 {stage === 2 && (
                   <Button size="lg" onClick={stir.start} disabled={stir.running} className="self-start">
                     <Wand2 aria-hidden="true" />
@@ -188,7 +188,7 @@ export function StepExtraction({ done, onComplete, onNext }: Props) {
                 powder={stage >= 1}
                 rod={stage === 2 || stage === 3}
                 stirring={stir.running}
-                title={`บีกเกอร์ 100 mL: ${stage >= 1 ? 'มีผงแก่นฝาง 1.0 g' : 'ว่าง'}${ethanolMl > 0 ? ` และเอทานอล ${ethanolMl.toFixed(1)} mL` : ''}`}
+                title={`บีกเกอร์ 100 mL: ${stage >= 1 ? 'มีผงแก่นฝาง 20.0 g' : 'ว่าง'}${ethanolMl > 0 ? ` และเอทานอล ${ethanolMl.toFixed(1)} mL` : ''}`}
                 className="max-w-56"
               />
               <span className="text-xs text-muted-foreground">บีกเกอร์ 100 mL (จุดวางสาร)</span>
@@ -206,7 +206,7 @@ export function StepExtraction({ done, onComplete, onNext }: Props) {
             </div>
           </div>
           <div className="grid grid-cols-3 gap-2 text-center">
-            <Readout label="ผงแก่นฝาง" value={stage >= 1 ? '1.0 g' : '0.0 g'} />
+            <Readout label="ผงแก่นฝาง" value={stage >= 1 ? '20.0 g' : '0.0 g'} />
             <Readout label="เอทานอล 75%" value={`${ethanolMl.toFixed(1)} mL`} />
             <Readout label="สารสกัดที่ได้" value={`${Math.round(filterProgress * 100)}%`} />
           </div>
