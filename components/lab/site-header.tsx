@@ -1,37 +1,207 @@
-import { FlaskConical, Leaf, Shield } from 'lucide-react'
+'use client'
+
+import { useState } from 'react'
+import { FlaskConical, Leaf, Shield, X, CheckCircle2 } from 'lucide-react'
 
 export function SiteHeader() {
+  const [activeModal, setActiveModal] = useState<'green' | 'micro' | null>(null)
+
   return (
-    <header className="border-b border-border bg-card/60 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 md:flex-row md:items-center md:justify-between md:px-6">
-        <div className="flex items-center gap-4">
-          <div
-            role="img"
-            aria-label="ตราสัญลักษณ์โรงเรียน (ตำแหน่งสำหรับใส่ตราโรงเรียน)"
-            className="flex size-14 shrink-0 items-center justify-center rounded-full border-2 border-primary bg-background shadow-[0_0_0_4px_rgba(250,204,21,0.12)]"
-          >
-            <Shield className="size-7 text-primary" aria-hidden="true" />
+    <>
+      <header className="border-b border-border bg-card/60 backdrop-blur sticky top-0 z-50">
+        <div className="mx-auto flex max-w-7xl flex-row items-center justify-between gap-3 px-3 py-3 md:px-6">
+          {/* โลโก้และชื่อหัวข้อ */}
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div
+              role="img"
+              aria-label="ตราสัญลักษณ์โรงเรียน"
+              className="flex size-10 sm:size-14 shrink-0 items-center justify-center rounded-full border-2 border-primary bg-background shadow-[0_0_4px_rgba(250,204,21,0.3)]"
+            >
+              <Shield className="size-5 sm:size-7 text-primary" aria-hidden="true" />
+            </div>
+            <div className="min-w-0 flex-1 truncate">
+              <p className="text-pretty text-xs sm:text-sm font-semibold leading-snug text-primary truncate">
+                สื่อการเรียนรู้ห้องปฏิบัติการเสมือน (Virtual Lab) - โรงเรียนหาดใหญ่วิทยาลัยสมบูรณ์กุลกันยา
+              </p>
+              <h1 className="text-pretty text-[11px] sm:text-sm leading-snug text-foreground truncate">
+                ชุดกระดาษทดสอบจำแนกความเข้มข้นของสารด้วยระยะทางการเคลื่อนที่บนกระดาษจากสารสกัดแก่นฝาง
+              </h1>
+            </div>
           </div>
-          <div className="min-w-0">
-            <p className="text-pretty text-sm font-semibold leading-snug text-primary md:text-base">
-              สื่อการเรียนรู้ห้องปฏิบัติการเสมือน (Virtual Lab) - โรงเรียนหาดใหญ่วิทยาลัยสมบูรณ์กุลกันยา
-            </p>
-            <h1 className="text-pretty text-sm leading-snug text-foreground md:text-base">
-              ชุดกระดาษทดสอบจำแนกความเข้มข้นของสารด้วยระยะทางการเคลื่อนที่บนกระดาษจากสารสกัดแก่นฝาง
-            </h1>
+
+          {/* ปุ่ม Green & Microscale Chemistry */}
+          <ul className="flex shrink-0 items-center gap-1.5 sm:gap-2" aria-label="แนวคิดหลัก">
+            <li>
+              <button
+                onClick={() => setActiveModal('green')}
+                className="inline-flex items-center gap-1.5 rounded-full border border-success/40 bg-success/10 px-2.5 py-1 text-[10px] sm:text-xs font-medium text-success transition-all hover:bg-success/25 hover:scale-105 active:scale-95 cursor-pointer whitespace-nowrap shadow-sm"
+              >
+                <Leaf className="size-3.5" aria-hidden="true" />
+                Green Chemistry
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => setActiveModal('micro')}
+                className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-[10px] sm:text-xs font-medium text-primary transition-all hover:bg-primary/25 hover:scale-105 active:scale-95 cursor-pointer whitespace-nowrap shadow-sm"
+              >
+                <FlaskConical className="size-3.5" aria-hidden="true" />
+                Microscale Chemistry
+              </button>
+            </li>
+          </ul>
+        </div>
+      </header>
+
+      {/* Modal: Green Chemistry (12 Principles) */}
+      {activeModal === 'green' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-2xl max-h-[85vh] flex flex-col rounded-2xl border border-success/30 bg-slate-900 shadow-2xl text-slate-100 overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950/50">
+              <div className="flex items-center gap-3 text-success">
+                <div className="p-2 rounded-xl bg-success/10 border border-success/30">
+                  <Leaf className="size-5" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold text-white">Green Chemistry (เคมีสีเขียว)</h3>
+                  <p className="text-xs text-success/80">หลักการ 12 ประการของเคมีสีเขียว (12 Principles of Green Chemistry)</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setActiveModal(null)}
+                className="rounded-full p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            {/* Content Body (Scrollable) */}
+            <div className="p-6 overflow-y-auto space-y-4 text-xs sm:text-sm text-slate-300 leading-relaxed">
+              <p className="text-slate-200">
+                <strong>เคมีสีเขียว (Green Chemistry)</strong> คือแนวทางการออกแบบผลิตภัณฑ์และกระบวนการทางเคมีเพื่อลดหรือกำจัดสารอันตราย โดยยึดหลักสำคัญ 12 ประการ ดังนี้:
+              </p>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/50 space-y-1">
+                  <span className="font-bold text-success text-xs">1. ป้องกันของเสีย (Prevention)</span>
+                  <p className="text-[11px] text-slate-400">ออกแบบกระบวนการเพื่อป้องกันการเกิดของเสียตั้งแต่ต้นทาง ดีกว่าการกำจัดของเสียภายหลัง</p>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/50 space-y-1">
+                  <span className="font-bold text-success text-xs">2. เศรษฐกิจอะตอม (Atom Economy)</span>
+                  <p className="text-[11px] text-slate-400">ออกแบบกระบวนการสังเคราะห์ให้เปลี่ยนสารตั้งต้นทุกอะตอมให้เป็นผลิตภัณฑ์ให้มากที่สุด</p>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/50 space-y-1">
+                  <span className="font-bold text-success text-xs">3. การสังเคราะห์สารอันตรายน้อยลง (Less Hazardous Syntheses)</span>
+                  <p className="text-[11px] text-slate-400">ใช้วิธีการสังเคราะห์ที่ใช้และผลิตสารที่มีความเป็นพิษต่อมนุษย์และสิ่งแวดล้อมน้อยที่สุด</p>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/50 space-y-1">
+                  <span className="font-bold text-success text-xs">4. ออกแบบสารเคมีปลอดภัย (Designing Safer Chemicals)</span>
+                  <p className="text-[11px] text-slate-400">ออกแบบผลิตภัณฑ์ให้ทำหน้าที่ได้ดีตามต้องการพร้อมทั้งมีความเป็นพิษต่ำ</p>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/50 space-y-1">
+                  <span className="font-bold text-success text-xs">5. ตัวทำละลายและตัวช่วยปลอดภัย (Safer Solvents & Auxiliaries)</span>
+                  <p className="text-[11px] text-slate-400">หลีกเลี่ยงการใช้ตัวทำละลายหรือสารช่วยแยกสกัด หากจำเป็นต้องใช้ให้เลือกชนิดที่ไม่เป็นอันตราย</p>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/50 space-y-1">
+                  <span className="font-bold text-success text-xs">6. ออกแบบเพื่อการใช้พลังงานที่มีประสิทธิภาพ</span>
+                  <p className="text-[11px] text-slate-400">คำนึงถึงพลังงานที่ใช้ ดำเนินการที่อุณหภูมิและความดันปกติ (Ambient conditions) เพื่อประหยัดพลังงาน</p>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/50 space-y-1">
+                  <span className="font-bold text-success text-xs">7. ใช้สารตั้งต้นจากธรรมชาติ (Renewable Feedstocks)</span>
+                  <p className="text-[11px] text-slate-400">ใช้วัตถุดิบหรือสารตั้งต้นที่มาจากทรัพยากรเกษตรหรือธรรมชาติที่หมุนเวียนทดแทนได้ มากกว่าใช้ปิโตรเลียม</p>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/50 space-y-1">
+                  <span className="font-bold text-success text-xs">8. ลดอนุพันธ์ที่ไม่จำเป็น (Reduce Derivatives)</span>
+                  <p className="text-[11px] text-slate-400">หลีกเลี่ยงการใช้กลุ่มคุ้มกัน (Blocking/protecting groups) หรือขั้นตอนอนุพันธ์ชั่วคราวเพื่อลดของเสีย</p>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/50 space-y-1">
+                  <span className="font-bold text-success text-xs">9. ใช้ตัวเร่งปฏิกิริยา (Catalysis)</span>
+                  <p className="text-[11px] text-slate-400">ใช้รีเอเจนต์ตัวเร่งปฏิกิริยาที่มีประสิทธิภาพสูงในปริมาณน้อย ดีกว่าใช้สารทำปฏิกิริยาแบบใช้แล้วทิ้ง (Stoichiometric)</p>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/50 space-y-1">
+                  <span className="font-bold text-success text-xs">10. ออกแบบเพื่อการเสื่อมสลาย (Design for Degradation)</span>
+                  <p className="text-[11px] text-slate-400">ออกแบบสารเคมีหลังใช้งานให้สลายตัวกลายเป็นผลิตภัณฑ์ที่ไม่เป็นพิษต่อสิ่งแวดล้อม ไม่สะสมในธรรมชาติ</p>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/50 space-y-1">
+                  <span className="font-bold text-success text-xs">11. วิเคราะห์แบบเรียลไทม์เพื่อป้องกันมลพิษ</span>
+                  <p className="text-[11px] text-slate-400">พัฒนากรรมวิธีวิเคราะห์และติดตามกระบวนการแบบเรียลไทม์ เพื่อควบคุมและป้องกันการเกิดสารอันตรายระหว่างผลิต</p>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/50 space-y-1">
+                  <span className="font-bold text-success text-xs">12. เคมีปลอดภัยเพื่อป้องกันอุบัติเหตุ</span>
+                  <p className="text-[11px] text-slate-400">เลือกใช้สารและรูปแบบสถานะทางกายภาพในกระบวนการ เพื่อลดความเสี่ยงต่ออุบัติเหตุ การระเบิด หรือเพลิงไหม้</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        <ul className="flex shrink-0 flex-wrap gap-2" aria-label="แนวคิดหลัก">
-          <li className="inline-flex items-center gap-1.5 rounded-full border border-success/40 bg-success/10 px-3 py-1 text-xs font-medium text-success">
-            <Leaf className="size-3.5" aria-hidden="true" />
-            Green Chemistry
-          </li>
-          <li className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-            <FlaskConical className="size-3.5" aria-hidden="true" />
-            Microscale Chemistry
-          </li>
-        </ul>
-      </div>
-    </header>
+      )}
+
+      {/* Modal: Microscale Chemistry (General Lab Miniaturization) */}
+      {activeModal === 'micro' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-xl max-h-[85vh] flex flex-col rounded-2xl border border-primary/30 bg-slate-900 shadow-2xl text-slate-100 overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950/50">
+              <div className="flex items-center gap-3 text-primary">
+                <div className="p-2 rounded-xl bg-primary/10 border border-primary/30">
+                  <FlaskConical className="size-5" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold text-white">Microscale Chemistry (เคมีแบบย่อส่วน)</h3>
+                  <p className="text-xs text-primary/80">หลักการ แนวคิด และประโยชน์ของการย่อขนาดห้องปฏิบัติการ</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setActiveModal(null)}
+                className="rounded-full p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            {/* Content Body (Scrollable) */}
+            <div className="p-6 overflow-y-auto space-y-4 text-xs sm:text-sm text-slate-300 leading-relaxed">
+              <p>
+                <strong>เคมีแบบย่อส่วน (Microscale Chemistry)</strong> คือแนวคิดและเทคนิคในการทำปฏิบัติการทางเคมีโดยลดขนาดปริมาณสารเคมี อุปกรณ์ และเครื่องมือลงให้เหลือน้อยที่สุด (มักอยู่ในระดับมิลลิลิตร หยด หรือไมโครลิตร) โดยยังคงให้ผลการทดลองที่ถูกต้องแม่นยำตามหลักการทางวิทยาศาสตร์
+              </p>
+
+              <div className="space-y-3">
+                <div className="rounded-xl bg-slate-800/80 p-4 border border-slate-700/50 space-y-2">
+                  <h4 className="font-semibold text-primary text-xs sm:text-sm flex items-center gap-2">
+                    <CheckCircle2 className="size-4 text-primary shrink-0" />
+                    วัตถุประสงค์และจุดเด่นทั่วไปของเคมีแบบย่อส่วน
+                  </h4>
+                  <ul className="space-y-2 text-xs text-slate-300 pl-6 list-disc">
+                    <li>
+                      <strong>ความปลอดภัยสูงสุด (Enhanced Safety):</strong> ลดความเสี่ยงจากอุบัติเหตุ การระเบิด หรือการสูดดมไอระเหยของสารเคมีเข้มข้นอันตราย เนื่องจากปริมาณสารมีน้อยมาก
+                    </li>
+                    <li>
+                      <strong>ลดการเกิดของเสีย (Waste Minimization):</strong> ของเสียเคมีที่ปล่อยสู่สิ่งแวดล้อมลดลงอย่างมหาศาล ง่ายต่อการบำบัดและจัดการ
+                    </li>
+                    <li>
+                      <strong>ประหยัดงบประมาณ (Cost Efficiency):</strong> ลดต้นทุนค่าใช้จ่ายในการซื้อสารเคมีราคาแพงและอุปกรณ์แก้วขนาดใหญ่
+                    </li>
+                    <li>
+                      <strong>เพิ่มความคล่องตัว (Portability):</strong> อุปกรณ์มีขนาดเล็ก น้ำหนักเบา จัดเก็บรักษาง่าย สามารถนำไปจัดกิจกรรมการเรียนรู้หรือภาคสนามได้อย่างสะดวก
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="rounded-xl bg-slate-800/80 p-4 border border-slate-700/50 space-y-2">
+                  <h4 className="font-semibold text-primary text-xs sm:text-sm flex items-center gap-2">
+                    <CheckCircle2 className="size-4 text-primary shrink-0" />
+                    การประยุกต์ใช้ในระดับสากลและการศึกษา
+                  </h4>
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    ปัจจุบันเคมีแบบย่อส่วนได้รับการยอมรับและส่งเสริมจากองค์กรการศึกษานานาชาติ (เช่น UNESCO และ IUPAC) เพื่อใช้ในการเรียนการสอนวิชาเคมีทั่วโลก ช่วยให้นักเรียนสามารถฝึกฝนทักษะกระบวนการทางวิทยาศาสตร์ได้อย่างปลอดภัย ทั่วถึง และเป็นมิตรต่อสิ่งแวดล้อม
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
