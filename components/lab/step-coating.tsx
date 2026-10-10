@@ -153,13 +153,9 @@ function CoatingSet({ set, locked, done, onComplete }: CoatingSetProps) {
             </div>
           )}
 
-          {/* กราฟิกหลอดเอเพนดอร์ฟขนาด 2 mL แทนบีกเกอร์เดิม */}
           <div className="flex flex-col items-center gap-2">
             <div className="relative flex h-48 w-20 flex-col justify-end overflow-hidden rounded-b-2xl rounded-t-md border-2 border-slate-400/60 bg-slate-900/40 p-1 shadow-inner">
-              {/* ฝาหลอดเอเพนดอร์ฟด้านบน */}
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 h-4 w-12 rounded-t-md bg-slate-500 border border-slate-300" />
-              
-              {/* ของเหลวภายในหลอดเอเพนดอร์ฟ */}
               <div
                 className="w-full rounded-b-xl transition-all duration-300 relative flex items-center justify-center"
                 style={{
@@ -335,7 +331,7 @@ function solutionColor(set: SetId, extract: number, reagent: number) {
   if (extract === 0) return '#e3ecf6'
   const info = SET_INFO[set]
   const target = info.paperColor
-  if (reagent === 0) return EXTRACT_COLOR // ใช้สีสารสกัดเดียวกับตอนกรอง (EXTRACT_COLOR)
+  if (reagent === 0) return EXTRACT_COLOR
   if (reagent > extract) {
     return mixHex(target, info.overshootColor, Math.min(1, (reagent - extract) / extract))
   }
