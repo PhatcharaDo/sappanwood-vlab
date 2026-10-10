@@ -93,7 +93,7 @@ export function StepExtraction({ done, onComplete, onNext }: Props) {
                 onClick={addPowder}
                 swatch={<span className="size-6 rounded-md bg-[#7a3e1d] shadow-inner" />}
                 name="ผงแก่นฝาง"
-                detail="1.0 g"
+                detail="20.0 g"
               />
               <EquipmentCard
                 dragId="ethanol"
@@ -102,7 +102,7 @@ export function StepExtraction({ done, onComplete, onNext }: Props) {
                 onClick={addEthanol}
                 swatch={<Droplets className="size-6 text-[#bcd3ee]" aria-hidden="true" />}
                 name="เอทานอล 75% V/V"
-                detail="5 mL"
+                detail="20 mL"
               />
             </div>
           </div>
@@ -115,7 +115,7 @@ export function StepExtraction({ done, onComplete, onNext }: Props) {
             )}
             {(pour.running || stage === 2) && (
               <>
-                <ProgressBar value={stage >= 2 && !pour.running ? stir.progress : pour.progress} label={pour.running ? `กำลังเทเอทานอล ${ethanolMl.toFixed(1)} / 5.0 mL` : `คนสาร ${stirSeconds.toFixed(0)} / 30 วินาที (จำลองเวลา)`} />
+                <ProgressBar value={stage >= 2 && !pour.running ? stir.progress : pour.progress} label={pour.running ? `กำลังเทเอทานอล ${ethanolMl.toFixed(1)} / 20.0 mL` : `คนสาร ${stirSeconds.toFixed(0)} / 30 วินาที (จำลองเวลา)`} />
                 {stage === 2 && (
                   <Button size="lg" onClick={stir.start} disabled={stir.running} className="self-start">
                     <Wand2 aria-hidden="true" />
