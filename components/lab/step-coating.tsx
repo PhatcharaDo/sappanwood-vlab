@@ -4,15 +4,13 @@ import { ArrowRight, Flame, Lock, Pipette, RotateCcw, Timer, Wind } from 'lucide
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { useTimedProgress } from '@/hooks/use-timed-progress'
-import { formatClock, mixHex, SET_INFO, type SetId } from '@/lib/lab'
+import { EXTRACT_COLOR, formatClock, mixHex, SET_INFO, type SetId } from '@/lib/lab'
 import { cn } from '@/lib/utils'
-import { BeakerGraphic, PetriDish } from './glassware'
+import { PetriDish } from './glassware'
 import { Notice, Panel, ProgressBar, StepHeading } from './lab-ui'
 
 const MIN_DROPS = 3
 const STRIP_COUNT = 5
-
-const BROWN_EXTRACT_COLOR = '#8B5A2B'
 
 type Props = {
   done: Record<SetId, boolean>
@@ -26,7 +24,7 @@ export function StepCoating({ done, onSetComplete, onNext }: Props) {
       <StepHeading
         step={2}
         title="เคลือบกระดาษ µPADs (Set A & Set B)"
-        subtitle="ผสมสารสกัดแก่นฝางกับเบสหรือกรดในอัตราส่วน 1:1 เพื่อเตรียมกระดาษทดสอบ 2 ชุด ชุดละ 5 แผ่น โดยต้องทำ Set A ให้เสร็จก่อนจึงจะปลดล็อก Set B"
+        subtitle="ผสมสารสกัดแก่นฝางกับเบสหรือกรดในอัตราส่วน 1:1 ในหลอดเอเพนดอร์ฟ (2 mL) เพื่อเตรียมกระดาษทดสอบ"
       />
       <div className="grid gap-6 xl:grid-cols-2">
         <CoatingSet set="A" locked={false} done={done.A} onComplete={() => onSetComplete('A')} />
@@ -155,13 +153,28 @@ function CoatingSet({ set, locked, done, onComplete }: CoatingSetProps) {
             </div>
           )}
 
-          <BeakerGraphic
-            level={Math.min(0.75, totalDrops * 0.045)}
-            color={mixColor}
-            capacityLabel="บีกเกอร์ผสม"
-            title={`บีกเกอร์ผสม: สารสกัด ${extractDrops} หยด, ${info.mixReagent} ${reagentDrops} หยด`}
-            className="mx-auto max-w-40"
-          />
+          {/* กราฟิกหลอดเอเพนดอร์ฟขนาด 2 mL แทนบีกเกอร์เดิม */}
+          <div className="flex flex-col items-center gap-2">
+            <div className="relative flex h-48 w-20 flex-col justify-end overflow-hidden rounded-b-2xl rounded-t-md border-2 border-slate-400/60 bg-slate-900/40 p-1 shadow-inner">
+              {/* ฝาหลอดเอเพนดอร์ฟด้านบน */}
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 h-4 w-12 rounded-t-md bg-slate-500 border border-slate-300" />
+              
+              {/* ของเหลวภายในหลอดเอเพนดอร์ฟ */}
+              <div
+                className="w-full rounded-b-xl transition-all duration-300 relative flex items-center justify-center"
+                style={{
+                  height: `${Math.min(90, Math.max(10, totalDrops * 5))}%`,
+                  backgroundColor: mixColor,
+                }}
+              >
+                <span className="text-[10px] font-bold text-white/90 drop-shadow-md">
+                  {totalDrops > 0 ? `${totalDrops} หยด` : ''}
+                </span>
+              </div>
+            </div>
+            <span className="text-xs text-muted-foreground font-medium">หลอดเอเพนดอร์ฟ (2 mL)</span>
+          </div>
+
           <div className="flex flex-col gap-3">
             <div className="grid grid-cols-2 gap-2">
               <Button variant="secondary" size="lg" onClick={addExtractDrop} disabled={locked || dropping !== null}>
@@ -322,11 +335,11 @@ function solutionColor(set: SetId, extract: number, reagent: number) {
   if (extract === 0) return '#e3ecf6'
   const info = SET_INFO[set]
   const target = info.paperColor
-  if (reagent === 0) return BROWN_EXTRACT_COLOR
+  if (reagent === 0) return EXTRACT_COLOR // ใช้สีสารสกัดเดียวกับตอนกรอง (EXTRACT_COLOR)
   if (reagent > extract) {
     return mixHex(target, info.overshootColor, Math.min(1, (reagent - extract) / extract))
   }
   const closeness = reagent / extract
   const strength = Math.min(1, Math.min(extract, reagent) / MIN_DROPS)
-  return mixHex(BROWN_EXTRACT_COLOR, target, closeness * strength)
+  return mixHex(EXTRACT_COLOR, target, closeness * strength)
 }
