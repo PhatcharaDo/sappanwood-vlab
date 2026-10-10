@@ -266,4 +266,92 @@ function CoatingSet({ set, locked, done, onComplete }: CoatingSetProps) {
           <fieldset className="flex flex-col gap-2" disabled={dry.running}>
             <legend className="mb-2 text-sm text-muted-foreground">เลือกวิธีทำให้กระดาษแห้ง</legend>
             <div className="grid grid-cols-2 gap-2">
-              {(Object.keys(
+              {(Object.keys(DRY_METHODS) as DryMethod[]).map((key) => {
+                const Icon = DRY_METHODS[key].icon
+                return (
+                  <label
+                    key={key}
+                    className={cn(
+                      'flex cursor-pointer items-center gap-2 rounded-lg border p-3 text-sm has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-ring',
+                      method === key ? 'border-primary bg-primary/10 text-foreground' : 'border-border text-muted-foreground',
+                    )}
+                  >
+                    <input
+                      type="radio"
+                      name={`dry-${set}`}
+                      value={key}
+                      checked={method === key}
+                      onChange={() => setMethod(key)}
+                      className="sr-only"
+                    />
+                    <Icon className="size-4" aria-hidden="true" />
+                    <span>
+                      {DRY_METHODS[key].label}
+                      <span className="block font-mono text-xs">{DRY_METHODS[key].seconds / 60} นาที</span>
+                    </span>
+                  </label>
+                )
+              })}
+            </div>
+          </fieldset>
+          <div className="flex items-center justify-between gap-4 rounded-xl border border-border bg-background p-4">
+            <div className="flex items-center gap-3">
+              <Timer className="size-6 text-primary" aria-hidden="true" />
+              <span className="font-mono text-4xl font-semibold tabular-nums text-primary" aria-live="off">
+                {formatClock(remainingSeconds)}
+              </span>
+            </div>
+            <div className="flex gap-1" aria-hidden="true">
+              {coated.map((_, i) => (
+                <span
+                  key={i}
+                  className="h-12 w-3 rounded-sm transition-opacity"
+                  style={{ backgroundColor: info.paperColor, opacity: 0.55 + dry.progress * 0.45 }}
+                />
+              ))}
+            </div>
+          </div>
+          <ProgressBar value={dry.progress} label="ความแห้งของกระดาษ (เร่งเวลาจำลอง)" />
+          <Button size="lg" onClick={dry.start} disabled={dry.running} className="self-start">
+            <Timer aria-hidden="true" />
+            {dry.running ? 'กำลังทำให้แห้ง...' : 'เริ่มจับเวลา'}
+          </Button>
+        </div>
+      )}
+
+      {phase === 'done' && (
+        <div className="flex flex-col items-center gap-3">
+          <PetriDish
+            colors={Array(STRIP_COUNT).fill(info.paperColor)}
+            label={`จานเพาะเชื้อ ${info.title}: ${info.paperName} 5 แผ่น`}
+          />
+          <Notice tone="success" className="w-full">
+            {info.title} เสร็จสมบูรณ์ — {info.paperName} 5 แผ่น พร้อมใช้งาน
+          </Notice>
+        </div>
+      )}
+
+      {locked && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-card/85 p-6 text-center backdrop-blur-sm">
+          <Lock className="size-8 text-primary" aria-hidden="true" />
+          <p className="font-semibold text-foreground">Set B ถูกล็อก</p>
+          <p className="text-sm text-muted-foreground">ต้องทำ Set A ให้เสร็จสมบูรณ์ก่อน</p>
+        </div>
+      )}
+    </Panel>
+  )
+}
+
+function solutionColor(set: SetId, extract: number, reagent: number) {
+  if (extract + reagent === 0) return 'transparent'
+  if (extract === 0) return '#e3ecf6'
+  const info = SET_INFO[set]
+  const target = info.paperColor
+  if (reagent === 0) return EXTRACT_COLOR
+  if (reagent > extract) {
+    return mixHex(target, info.overshootColor, Math.min(1, (reagent - extract) / extract))
+  }
+  const closeness = reagent / extract
+  const strength = Math.min(1, Math.min(extract, reagent) / TARGET_DROPS)
+  return mixHex(EXTRACT_COLOR, target, closeness * strength)
+}
