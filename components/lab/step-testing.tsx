@@ -1,221 +1,206 @@
 'use client'
 
-import { type KeyboardEvent, type PointerEvent, useRef, useState } from 'react'
-import { CONCENTRATIONS, mixHex, PX_PER_MM, SET_INFO, type SetId, STRIP_LENGTH_MM } from '@/lib/lab'
+import { ArrowRight, Pipette, Ruler } from 'lucide-react'
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { CONCENTRATIONS, SET_IDS, SET_INFO, type SetId } from '@/lib/lab'
 import { cn } from '@/lib/utils'
+import { Notice, Panel, StepHeading } from './lab-ui'
+import { TestBench } from './test-bench'
 
-const TOP = 28
-const STRIP_H = STRIP_LENGTH_MM * PX_PER_MM
-const BASE = TOP + STRIP_H
-const BENCH_H = BASE + 52
-const STRIP_W = 28
-const STRIP_X0 = 112
-const STRIP_GAP = 84
-const BENCH_W = STRIP_X0 + STRIP_GAP * 4 + STRIP_W + 100
-const RULER_MM = 65
-const RULER_H = RULER_MM * PX_PER_MM
-const RULER_W = 52
+const WARNING = 'ทำไม่ได้! ต้องเปลี่ยนความเข้มข้นหรือหยดให้ถูกต้อง'
 
-export function reactedColor(set: SetId, index: number) {
-  const info = SET_INFO[set]
-  return mixHex(info.paperColor, info.reactedColor, 0.55 + index * 0.1)
+type Props = {
+  tested: Record<SetId, boolean[]>
+  onTest: (set: SetId, index: number) => void
+  onNext: () => void
 }
 
-type TestBenchProps = {
-  set: SetId
-  tested: boolean[]
-  animateIndex?: number | null
-  onStripClick?: (index: number) => void
-  showHint?: boolean
-  selectedIndex?: number | null
-}
+export function StepTesting({ tested, onTest, onNext }: Props) {
+  const [activeSet, setActiveSet] = useState<SetId>('A')
+  const [selected, setSelected] = useState<Record<SetId, number | null>>({ A: null, B: null })
+  const [warning, setWarning] = useState<string | null>(null)
+  const [animateIndex, setAnimateIndex] = useState<Record<SetId, number | null>>({ A: null, B: null })
 
-export function TestBench({ set, tested, animateIndex = null, onStripClick, showHint = false, selectedIndex = null }: TestBenchProps) {
-  const info = SET_INFO[set]
-  const benchRef = useRef<HTMLDivElement>(null)
-  const dragOffset = useRef<number | null>(null)
-  const [rulerX, setRulerX] = useState(28)
-  const [cursorMm, setCursorMm] = useState<number | null>(null)
+  const info = SET_INFO[activeSet]
+  const setTested = tested[activeSet]
+  const nextIndex = setTested.indexOf(false)
+  const selectedIndex = selected[activeSet]
+  const allDone = SET_IDS.every((id) => tested[id].every(Boolean))
 
-  // ระบบสุ่มระยะทาง: เรียงลำดับจากน้อยไปมากตามความเข้มข้น และมีระยะห่างเหมาะสม
-  const [randomDistances] = useState<number[]>(() => {
-    const distances: number[] = []
-    let current = Math.floor(Math.random() * 6) + 12 // เริ่มต้นที่ประมาณ 12-17 mm
-    for (let i = 0; i < CONCENTRATIONS.length; i++) {
-      distances.push(current)
-      current += Math.floor(Math.random() * 5) + 8 // เว้นระยะห่างแต่ละระดับ 8-12 mm
-    }
-    return distances
-  })
+  function handleStripClick(index: number) {
+    if (setTested[index]) {
+      setWarning(`แถบที่ ${index + 1} ถูกหยดสารไปแล้ว ไม่สามารถหยดซ้ำได้`)
+      return
+    }
+    if (selectedIndex === null) {
+      setWarning('ยังไม่ได้เลือกความเข้มข้นของสารที่จะหยด')
+      return
+    }
+    if (selectedIndex !== index) {
+      setWarning(
+        `เลือกสาร ${CONCENTRATIONS[selectedIndex].toFixed(1)} M แต่แถบที่ ${index + 1} ใช้สำหรับ ${CONCENTRATIONS[index].toFixed(1)} M`,
+      )
+      return
+    }
+    if (index !== nextIndex) {
+      setWarning(`ต้องทดสอบทีละแถบตามลำดับ — แถบถัดไปคือแถบที่ ${nextIndex + 1} (${CONCENTRATIONS[nextIndex].toFixed(1)} M)`)
+      return
+    }
+    setWarning(null)
+    setAnimateIndex((prev) => ({ ...prev, [activeSet]: index }))
+    setSelected((prev) => ({ ...prev, [activeSet]: null }))
+    onTest(activeSet, index)
+  }
 
-  const clampX = (x: number) => Math.max(0, Math.min(BENCH_W - RULER_W, x))
+  function switchSet(id: SetId) {
+    setActiveSet(id)
+    setWarning(null)
+  }
 
-  function handleRulerDown(event: PointerEvent<HTMLDivElement>) {
-    event.currentTarget.setPointerCapture(event.pointerId)
-    const rect = benchRef.current?.getBoundingClientRect()
-    if (!rect) return
-    dragOffset.current = event.clientX - rect.left - rulerX
-  }
+  return (
+    <div className="flex flex-col gap-6">
+      <StepHeading
+        step={3}
+        title="ทดลองหยดสาร 0.1 - 0.5 M (Capillary Action)"
+        subtitle="เลือกความเข้มข้นของสาร แล้วหยดลงบนกระดาษ µPADs ทีละแถบตามลำดับ สังเกตการเคลื่อนที่ของสารตามแรงแคพิลลารีและการเปลี่ยนสีของกระดาษ"
+      />
 
-  function handleRulerMove(event: PointerEvent<HTMLDivElement>) {
-    if (dragOffset.current === null) return
-    const rect = benchRef.current?.getBoundingClientRect()
-    if (!rect) return
-    setRulerX(clampX(event.clientX - rect.left - dragOffset.current))
-  }
+      <div role="tablist" aria-label="เลือกชุดกระดาษทดสอบ" className="grid grid-cols-2 gap-2 sm:inline-grid sm:w-fit">
+        {SET_IDS.map((id) => {
+          const count = tested[id].filter(Boolean).length
+          return (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              aria-selected={activeSet === id}
+              onClick={() => switchSet(id)}
+              className={cn(
+                'flex items-center gap-3 rounded-xl border px-4 py-2.5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-ring',
+                activeSet === id ? 'border-primary bg-primary/10' : 'border-border bg-card hover:border-primary/60',
+              )}
+            >
+              <span className="h-8 w-3 rounded-sm" style={{ backgroundColor: SET_INFO[id].paperColor }} aria-hidden="true" />
+              <span>
+                <span className="block text-sm font-semibold text-foreground">
+                  {SET_INFO[id].title} · {SET_INFO[id].purpose}
+                </span>
+                <span className="block font-mono text-xs text-muted-foreground">{count}/5 แถบ</span>
+              </span>
+            </button>
+          )
+        })}
+      </div>
 
-  function handleRulerKey(event: KeyboardEvent<HTMLDivElement>) {
-    if (event.key === 'ArrowRight') setRulerX((x) => clampX(x + 8))
-    if (event.key === 'ArrowLeft') setRulerX((x) => clampX(x - 8))
-  }
+      {warning && (
+        <Notice tone="warning">
+          <p className="font-semibold">{WARNING}</p>
+          <p className="text-destructive/80">{warning}</p>
+        </Notice>
+      )}
 
-  function handleBenchMove(event: PointerEvent<HTMLDivElement>) {
-    const rect = benchRef.current?.getBoundingClientRect()
-    if (!rect) return
-    const mm = (BASE - (event.clientY - rect.top)) / PX_PER_MM
-    setCursorMm(mm >= 0 && mm <= RULER_MM ? Math.round(mm) : null)
-  }
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+        <Panel className="flex flex-col gap-5">
+          <fieldset className="flex flex-col gap-3">
+            <legend className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
+              <Pipette className="size-4 text-primary" aria-hidden="true" />
+              เลือกความเข้มข้นของ{info.testReagent} ({info.testFormula})
+            </legend>
+            <div className="grid grid-cols-5 gap-1.5 lg:grid-cols-1">
+              {CONCENTRATIONS.map((conc, i) => {
+                const done = setTested[i]
+                return (
+                  <label
+                    key={conc}
+                    className={cn(
+                      'flex cursor-pointer flex-col items-center justify-between gap-1 rounded-lg border px-2 py-2 text-sm transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-ring lg:flex-row lg:px-3',
+                      selectedIndex === i ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-muted text-foreground hover:border-primary/60',
+                    )}
+                  >
+                    <input
+                      type="radio"
+                      name={`conc-${activeSet}`}
+                      value={conc}
+                      checked={selectedIndex === i}
+                      onChange={() => setSelected((prev) => ({ ...prev, [activeSet]: i }))}
+                      className="sr-only"
+                    />
+                    <span className="font-mono font-semibold">
+                      <span className="hidden lg:inline">{info.testFormula} </span>
+                      {conc.toFixed(1)} M
+                    </span>
+                    <span className={cn('text-[10px]', selectedIndex === i ? 'text-primary-foreground/80' : done ? 'text-success' : 'text-muted-foreground')}>
+                      {done ? 'หยดแล้ว' : 'ยังไม่หยด'}
+                    </span>
+                  </label>
+                )
+              })}
+            </div>
+          </fieldset>
 
-  return (
-    <div className="overflow-x-auto rounded-xl border border-border bg-[#0d1f38]">
-      <div
-        ref={benchRef}
-        className="relative mx-auto touch-none select-none"
-        style={{ width: BENCH_W, height: BENCH_H }}
-        onPointerMove={handleBenchMove}
-        onPointerLeave={() => setCursorMm(null)}
-      >
-        <div
-          className="absolute inset-x-0 border-t border-dashed border-primary/50"
-          style={{ top: BASE }}
-          aria-hidden="true"
-        />
-        <span className="absolute right-2 font-mono text-[10px] text-primary/80" style={{ top: BASE + 2 }} aria-hidden="true">
-          จุดหยด (0 mm)
-        </span>
+          <Notice>
+            {nextIndex === -1 ? (
+              <span>
+                {info.title} ทดสอบครบ 5 แถบแล้ว
+                {!allDone && ' — สลับไปทดสอบอีกชุดหนึ่ง'}
+              </span>
+            ) : selectedIndex === null ? (
+              <span>เลือกความเข้มข้น แล้วคลิกที่แถบกระดาษที่ตรงกันเพื่อหยดสาร</span>
+            ) : (
+              <span>
+                ถือหลอดหยดสาร {info.testFormula} {CONCENTRATIONS[selectedIndex].toFixed(1)} M — คลิกที่แถบกระดาษเพื่อหยด
+              </span>
+            )}
+          </Notice>
 
-        {CONCENTRATIONS.map((conc, i) => {
-          const left = STRIP_X0 + i * STRIP_GAP
-          const migrated = tested[i] ? randomDistances[i] * PX_PER_MM : 0
-          const label = `แถบที่ ${i + 1} สำหรับ ${info.testReagent} ${conc.toFixed(1)} M${tested[i] ? ' (หยดแล้ว)' : ''}`
-          const content = (
-            <>
-              {tested[i] && (
-                <span
-                  key={animateIndex === i ? 'animating' : 'static'}
-                  className={cn('absolute inset-x-0 bottom-0', animateIndex === i && 'animate-migrate')}
-                  style={{
-                    height: migrated,
-                    background: `linear-gradient(to top, ${reactedColor(set, i)} 0%, ${reactedColor(set, i)} 88%, ${mixHex(reactedColor(set, i), info.paperColor, 0.5)} 100%)`,
-                  }}
-                />
-              )}
-              <span className="absolute bottom-1 left-1/2 size-2.5 -translate-x-1/2 rounded-full border border-white/50 bg-white/20" />
-            </>
-          )
-          const common = cn(
-            'absolute overflow-hidden rounded-[3px] shadow-md',
-            selectedIndex === i && !tested[i] && 'ring-2 ring-primary ring-offset-2 ring-offset-[#0d1f38]',
-          )
-          const style = { left, top: TOP, width: STRIP_W, height: STRIP_H, backgroundColor: info.paperColor }
-          return (
-            <div key={conc}>
-              {onStripClick ? (
-                <button
-                  type="button"
-                  aria-label={label}
-                  onClick={() => onStripClick(i)}
-                  className={cn(common, 'cursor-pointer hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring')}
-                  style={style}
-                >
-                  {content}
-                </button>
-              ) : (
-                <div role="img" aria-label={label} className={common} style={style}>
-                  {content}
-                </div>
-              )}
-              {animateIndex === i && (
-                <span
-                  key={`drop-${animateIndex}`}
-                  className="animate-drop-fall pointer-events-none absolute size-3 rounded-full rounded-tl-none bg-sky-200"
-                  style={{ left: left + STRIP_W / 2 - 6, top: BASE - 14 }}
-                  aria-hidden="true"
-                />
-              )}
-              <span
-                className="pointer-events-none absolute flex flex-col items-center text-center leading-tight"
-                style={{ left: left - 22, width: STRIP_W + 44, top: BASE + 14 }}
-              >
-                <span className="text-[11px] text-muted-foreground">แถบ {i + 1}</span>
-                <span className={cn('font-mono text-xs font-semibold', tested[i] ? 'text-success' : 'text-foreground')}>
-                  {conc.toFixed(1)} M
-                </span>
-              </span>
-            </div>
-          )
-        })}
+          <div className="flex flex-col gap-2 text-xs leading-relaxed text-muted-foreground">
+            <p className="flex items-center gap-2 font-semibold text-foreground">
+              <Ruler className="size-4 text-primary" aria-hidden="true" />
+              การใช้ไม้บรรทัดเสมือน
+            </p>
+            <p>ลากไม้บรรทัดไปวางข้างแถบกระดาษ (หรือคลิกแล้วกดลูกศรซ้าย/ขวา) อ่านค่าระยะทางจากจุดหยด (0 mm) ถึงขอบบนของสีที่เปลี่ยน แล้วจดบันทึกไว้ใช้ในขั้นตอนที่ 4</p>
+          </div>
+        </Panel>
 
-        {cursorMm !== null && (
-          <div
-            className="pointer-events-none absolute inset-x-0 border-t border-sky-300/70"
-            style={{ top: BASE - cursorMm * PX_PER_MM }}
-            aria-hidden="true"
-          >
-            <span className="absolute -top-5 right-2 rounded bg-sky-300 px-1.5 font-mono text-[10px] font-semibold text-slate-900">
-              {cursorMm} mm
-            </span>
-          </div>
-        )}
+        <Panel className="flex flex-col gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="text-sm font-semibold text-foreground">
+              {info.title}: {info.paperName} + {info.testReagent}
+            </h3>
+            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <span className="size-3 rounded-sm" style={{ backgroundColor: info.paperColor }} aria-hidden="true" />
+                ก่อนทำปฏิกิริยา
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="size-3 rounded-sm" style={{ backgroundColor: info.reactedColor }} aria-hidden="true" />
+                หลังทำปฏิกิริยา
+              </span>
+            </div>
+          </div>
+          <TestBench
+            key={activeSet}
+            set={activeSet}
+            tested={setTested}
+            animateIndex={animateIndex[activeSet]}
+            selectedIndex={selectedIndex}
+            onStripClick={handleStripClick}
+          />
+        </Panel>
+      </div>
 
-        <div
-          role="slider"
-          tabIndex={0}
-          aria-label="ไม้บรรทัดเสมือน (ลากหรือกดลูกศรซ้าย/ขวาเพื่อเลื่อน)"
-          aria-valuemin={0}
-          aria-valuemax={BENCH_W - RULER_W}
-          aria-valuenow={Math.round(rulerX)}
-          onPointerDown={handleRulerDown}
-          onPointerMove={handleRulerMove}
-          onPointerUp={() => (dragOffset.current = null)}
-          onKeyDown={handleRulerKey}
-          className="absolute cursor-grab rounded-sm shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:cursor-grabbing"
-          style={{ left: rulerX, top: BASE - RULER_H, width: RULER_W, height: RULER_H + 6 }}
-        >
-          <svg width={RULER_W} height={RULER_H + 6} aria-hidden="true" className="block">
-            <rect x="0" y="0" width={RULER_W} height={RULER_H + 6} rx="3" fill="#f3e3b3" opacity="0.94" />
-            {Array.from({ length: RULER_MM + 1 }, (_, mm) => {
-              const y = RULER_H - mm * PX_PER_MM
-              const len = mm % 10 === 0 ? 18 : mm % 5 === 0 ? 12 : 6
-              return (
-                <g key={mm}>
-                  <line x1={RULER_W - len} x2={RULER_W} y1={y} y2={y} stroke="#1e293b" strokeWidth={mm % 10 === 0 ? 1.4 : 0.8} />
-                  {mm % 10 === 0 && (
-                    <text x={RULER_W - 21} y={y + 3} fontSize="9" textAnchor="end" fill="#1e293b" fontFamily="monospace">
-                      {mm}
-                    </text>
-                  )}
-                </g>
-              )
-            })}
-            <text x="4" y="10" fontSize="8" fill="#475569" fontFamily="monospace">
-              mm
-            </text>
-            {showHint &&
-              randomDistances.map((mm, i) => {
-                const y = RULER_H - mm * PX_PER_MM
-                return (
-                  <g key={`hint-${mm}`}>
-                    <line x1="0" x2={RULER_W} y1={y} y2={y} stroke="#dc2626" strokeWidth="2" />
-                    <text x="3" y={y - 2} fontSize="7" fill="#dc2626" fontWeight="700" fontFamily="monospace">
-                      {CONCENTRATIONS[i].toFixed(1)}M
-                    </text>
-                  </g>
-                )
-              })}
-          </svg>
-        </div>
-      </div>
-    </div>
-  )
+      {allDone && (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <Notice tone="success" className="flex-1">
+            ทดสอบครบทั้ง Set A และ Set B แล้ว อย่าลืมวัดและจดบันทึกระยะทางการเคลื่อนที่ของแต่ละแถบ
+          </Notice>
+          <Button size="lg" onClick={onNext}>
+            ไปขั้นตอนที่ 4
+            <ArrowRight aria-hidden="true" />
+          </Button>
+        </div>
+      )}
+    </div>
+  )
 }
