@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils'
 import { PetriDish } from './glassware'
 import { Notice, Panel, ProgressBar, StepHeading } from './lab-ui'
 
-const MIN_DROPS = 3
+const TARGET_DROPS = 20 // 1 mL = 20 หยดตามมาตรฐาน
 const STRIP_COUNT = 5
 
 type Props = {
@@ -24,7 +24,7 @@ export function StepCoating({ done, onSetComplete, onNext }: Props) {
       <StepHeading
         step={2}
         title="เคลือบกระดาษ µPADs (Set A & Set B)"
-        subtitle="ผสมสารสกัดแก่นฝางกับเบสหรือกรดในอัตราส่วน 1:1 ในหลอดเอเพนดอร์ฟ (2 mL) เพื่อเตรียมกระดาษทดสอบ"
+        subtitle="ผสมสารสกัดแก่นฝางกับเบสหรือกรดในอัตราส่วน 1:1 (อย่างละ 1 mL หรือ 20 หยด) ในหลอดเอเพนดอร์ฟ (2 mL)"
       />
       <div className="grid gap-6 xl:grid-cols-2">
         <CoatingSet set="A" locked={false} done={done.A} onComplete={() => onSetComplete('A')} />
@@ -74,25 +74,27 @@ function CoatingSet({ set, locked, done, onComplete }: CoatingSetProps) {
     onComplete()
   })
 
-  const balanced = extractDrops === reagentDrops && extractDrops >= MIN_DROPS
+  const balanced = extractDrops === TARGET_DROPS && reagentDrops === TARGET_DROPS
   const mixColor = solutionColor(set, extractDrops, reagentDrops)
   const totalDrops = extractDrops + reagentDrops
   const remainingSeconds = DRY_METHODS[method].seconds * (1 - dry.progress)
 
   function addExtractDrop() {
-    if (locked) return
+    if (locked || extractDrops >= TARGET_DROPS) return
     setDropping('extract')
     setTimeout(() => {
-      setExtractDrops((d) => d + 1)
+      const randomBatch = Math.floor(Math.random() * 3) + 3 // สุ่ม 3-5 หยดต่อการคลิก 1 ครั้ง
+      setExtractDrops((d) => Math.min(TARGET_DROPS, d + randomBatch))
       setDropping(null)
     }, 300)
   }
 
   function addReagentDrop() {
-    if (locked) return
+    if (locked || reagentDrops >= TARGET_DROPS) return
     setDropping('reagent')
     setTimeout(() => {
-      setReagentDrops((d) => d + 1)
+      const randomBatch = Math.floor(Math.random() * 3) + 3 // สุ่ม 3-5 หยดต่อการคลิก 1 ครั้ง
+      setReagentDrops((d) => Math.min(TARGET_DROPS, d + randomBatch))
       setDropping(null)
     }, 300)
   }
@@ -153,57 +155,69 @@ function CoatingSet({ set, locked, done, onComplete }: CoatingSetProps) {
             </div>
           )}
 
+          {/* หลอดเอเพนดอร์ฟ 2 mL (ว่างเปล่าเมื่อ 0 หยด ไม่มีสีขาว) */}
           <div className="flex flex-col items-center gap-2">
             <div className="relative flex h-48 w-20 flex-col justify-end overflow-hidden rounded-b-2xl rounded-t-md border-2 border-slate-400/60 bg-slate-900/40 p-1 shadow-inner">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 h-4 w-12 rounded-t-md bg-slate-500 border border-slate-300" />
-              <div
-                className="w-full rounded-b-xl transition-all duration-300 relative flex items-center justify-center"
-                style={{
-                  height: `${Math.min(90, Math.max(10, totalDrops * 5))}%`,
-                  backgroundColor: mixColor,
-                }}
-              >
-                <span className="text-[10px] font-bold text-white/90 drop-shadow-md">
-                  {totalDrops > 0 ? `${totalDrops} หยด` : ''}
-                </span>
-              </div>
+              {totalDrops > 0 && (
+                <div
+                  className="w-full rounded-b-xl transition-all duration-300 relative flex items-center justify-center"
+                  style={{
+                    height: `${(totalDrops / 40) * 100}%`,
+                    backgroundColor: mixColor,
+                  }}
+                >
+                  <span className="text-[10px] font-bold text-white/90 drop-shadow-md">
+                    {totalDrops} หยด ({(totalDrops / 20).toFixed(1)} mL)
+                  </span>
+                </div>
+              )}
             </div>
             <span className="text-xs text-muted-foreground font-medium">หลอดเอเพนดอร์ฟ (2 mL)</span>
           </div>
 
           <div className="flex flex-col gap-3">
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="secondary" size="lg" onClick={addExtractDrop} disabled={locked || dropping !== null}>
+              <Button
+                variant="secondary"
+                size="lg"
+                onClick={addExtractDrop}
+                disabled={locked || dropping !== null || extractDrops >= TARGET_DROPS}
+              >
                 <Pipette aria-hidden="true" />
-                สารสกัด
+                สารสกัด ({extractDrops}/20)
               </Button>
-              <Button variant="secondary" size="lg" onClick={addReagentDrop} disabled={locked || dropping !== null}>
+              <Button
+                variant="secondary"
+                size="lg"
+                onClick={addReagentDrop}
+                disabled={locked || dropping !== null || reagentDrops >= TARGET_DROPS}
+              >
                 <Pipette aria-hidden="true" />
-                {info.mixReagent}
+                {info.mixReagent} ({reagentDrops}/20)
               </Button>
             </div>
             <dl className="grid grid-cols-2 gap-2 text-center">
               <div className="rounded-lg border border-border bg-muted p-2">
-                <dt className="text-[11px] text-muted-foreground">สารสกัด</dt>
-                <dd className="font-mono text-lg font-semibold text-primary">{extractDrops}</dd>
+                <dt className="text-[11px] text-muted-foreground">สารสกัด ({(extractDrops / 20).toFixed(1)} mL)</dt>
+                <dd className="font-mono text-lg font-semibold text-primary">{extractDrops} หยด</dd>
               </div>
               <div className="rounded-lg border border-border bg-muted p-2">
-                <dt className="text-[11px] text-muted-foreground">{info.mixReagent}</dt>
-                <dd className="font-mono text-lg font-semibold text-primary">{reagentDrops}</dd>
+                <dt className="text-[11px] text-muted-foreground">{info.mixReagent} ({(reagentDrops / 20).toFixed(1)} mL)</dt>
+                <dd className="font-mono text-lg font-semibold text-primary">{reagentDrops} หยด</dd>
               </div>
             </dl>
-            <p className="text-xs text-muted-foreground" aria-live="polite">
+            <p className="text-xs text-muted-foreground leading-relaxed" aria-live="polite">
+              *มาตรฐาน: <span className="text-foreground font-medium">1 mL = 20 หยด</span> (ใช้สารสกัด 1 mL และรีเอเจนต์ 1 mL รวมเป็น 2 mL เต็มหลอด)<br />
               อัตราส่วน{' '}
               <span className="font-mono text-foreground">
                 {extractDrops}:{reagentDrops}
               </span>{' '}
               {totalDrops === 0
-                ? `— หยดสารอย่างละอย่างน้อย ${MIN_DROPS} หยด`
+                ? '— หยดสารสกัดและรีเอเจนต์สลับกันให้สะสมครบอย่างละ 20 หยด'
                 : balanced
-                  ? `— 1:1 แล้ว สารละลายเปลี่ยนเป็น${set === 'A' ? 'สีแดง' : 'สีเหลือง'}`
-                  : extractDrops !== reagentDrops
-                    ? '— ยังไม่เป็น 1:1 กรุณาปรับจำนวนหยด'
-                    : `— ต้องหยดอย่างละอย่างน้อย ${MIN_DROPS} หยด`}
+                  ? `— ครบอัตราส่วน 1:1 (อย่างละ 1 mL) แล้ว สารละลายเปลี่ยนเป็น${set === 'A' ? 'สีแดง' : 'สีเหลือง'}`
+                  : '— กำลังผสม (หยดสลับสะสมให้ครบอย่างละ 20 หยด)'}
             </p>
             <div className="flex flex-wrap gap-2">
               <Button size="lg" onClick={() => setPhase('coat')} disabled={!balanced || locked}>
@@ -231,111 +245,4 @@ function CoatingSet({ set, locked, done, onComplete }: CoatingSetProps) {
                 aria-label={`เคลือบกระดาษแผ่นที่ ${i + 1}${isCoated ? ' (เคลือบแล้ว)' : ''}`}
                 className={cn(
                   'flex h-32 w-8 items-end justify-center rounded-sm border pb-1 font-mono text-[10px] transition-colors duration-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
-                  isCoated ? 'border-transparent text-white/80' : 'border-border bg-[#f5f1e8] text-slate-500 hover:ring-2 hover:ring-primary',
-                )}
-                style={isCoated ? { backgroundColor: info.paperColor, color: set === 'B' ? '#5b4300' : undefined } : undefined}
-              >
-                {i + 1}
-              </button>
-            ))}
-          </div>
-          <Button size="lg" onClick={() => setPhase('dry')} disabled={!allCoated} className="self-start">
-            เคลือบครบแล้ว นำไปทำให้แห้ง
-          </Button>
-        </div>
-      )}
-
-      {phase === 'dry' && (
-        <div className="flex flex-col gap-4">
-          <fieldset className="flex flex-col gap-2" disabled={dry.running}>
-            <legend className="mb-2 text-sm text-muted-foreground">เลือกวิธีทำให้กระดาษแห้ง</legend>
-            <div className="grid grid-cols-2 gap-2">
-              {(Object.keys(DRY_METHODS) as DryMethod[]).map((key) => {
-                const Icon = DRY_METHODS[key].icon
-                return (
-                  <label
-                    key={key}
-                    className={cn(
-                      'flex cursor-pointer items-center gap-2 rounded-lg border p-3 text-sm has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-ring',
-                      method === key ? 'border-primary bg-primary/10 text-foreground' : 'border-border text-muted-foreground',
-                    )}
-                  >
-                    <input
-                      type="radio"
-                      name={`dry-${set}`}
-                      value={key}
-                      checked={method === key}
-                      onChange={() => setMethod(key)}
-                      className="sr-only"
-                    />
-                    <Icon className="size-4" aria-hidden="true" />
-                    <span>
-                      {DRY_METHODS[key].label}
-                      <span className="block font-mono text-xs">{DRY_METHODS[key].seconds / 60} นาที</span>
-                    </span>
-                  </label>
-                )
-              })}
-            </div>
-          </fieldset>
-          <div className="flex items-center justify-between gap-4 rounded-xl border border-border bg-background p-4">
-            <div className="flex items-center gap-3">
-              <Timer className="size-6 text-primary" aria-hidden="true" />
-              <span className="font-mono text-4xl font-semibold tabular-nums text-primary" aria-live="off">
-                {formatClock(remainingSeconds)}
-              </span>
-            </div>
-            <div className="flex gap-1" aria-hidden="true">
-              {coated.map((_, i) => (
-                <span
-                  key={i}
-                  className="h-12 w-3 rounded-sm transition-opacity"
-                  style={{ backgroundColor: info.paperColor, opacity: 0.55 + dry.progress * 0.45 }}
-                />
-              ))}
-            </div>
-          </div>
-          <ProgressBar value={dry.progress} label="ความแห้งของกระดาษ (เร่งเวลาจำลอง)" />
-          <Button size="lg" onClick={dry.start} disabled={dry.running} className="self-start">
-            <Timer aria-hidden="true" />
-            {dry.running ? 'กำลังทำให้แห้ง...' : 'เริ่มจับเวลา'}
-          </Button>
-        </div>
-      )}
-
-      {phase === 'done' && (
-        <div className="flex flex-col items-center gap-3">
-          <PetriDish
-            colors={Array(STRIP_COUNT).fill(info.paperColor)}
-            label={`จานเพาะเชื้อ ${info.title}: ${info.paperName} 5 แผ่น`}
-          />
-          <Notice tone="success" className="w-full">
-            {info.title} เสร็จสมบูรณ์ — {info.paperName} 5 แผ่น พร้อมใช้งาน
-          </Notice>
-        </div>
-      )}
-
-      {locked && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-card/85 p-6 text-center backdrop-blur-sm">
-          <Lock className="size-8 text-primary" aria-hidden="true" />
-          <p className="font-semibold text-foreground">Set B ถูกล็อก</p>
-          <p className="text-sm text-muted-foreground">ต้องทำ Set A ให้เสร็จสมบูรณ์ก่อน</p>
-        </div>
-      )}
-    </Panel>
-  )
-}
-
-function solutionColor(set: SetId, extract: number, reagent: number) {
-  if (extract + reagent === 0) return '#e3ecf6'
-  if (extract === 0) return '#e3ecf6'
-  const info = SET_INFO[set]
-  const target = info.paperColor
-  if (reagent === 0) return EXTRACT_COLOR
-  if (reagent > extract) {
-    return mixHex(target, info.overshootColor, Math.min(1, (reagent - extract) / extract))
-  }
-  const closeness = reagent / extract
-  const strength = Math.min(1, Math.min(extract, reagent) / MIN_DROPS)
-  return mixHex(EXTRACT_COLOR, target, closeness * strength)
-}
+                  isCoated ? 'border-transparent text-white/80' : 'border-border bg-[#f5f1e8] text-slate-
