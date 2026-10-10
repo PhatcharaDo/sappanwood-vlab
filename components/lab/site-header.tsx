@@ -8,9 +8,10 @@ export function SiteHeader() {
 
   return (
     <>
-      <header className="border-b border-border bg-card/80 backdrop-blur sticky top-0 z-50">
+      {/* ตรึง Header ให้อยู่กับที่ด้านบนสุดเสมอเวลาเลื่อนหน้าจอ */}
+      <header className="border-b border-border bg-card/95 backdrop-blur-md sticky top-0 z-50 shadow-md">
         <div className="mx-auto flex max-w-7xl flex-col md:flex-row md:items-center md:justify-between gap-3 px-4 py-3.5 md:px-6">
-          {/* ฝั่งซ้าย: โลโก้ + ชื่อหัวข้อ (เต็มความกว้างบนมือถือ ไม่ถูกบีบ) */}
+          {/* ฝั่งซ้าย: โลโก้ + ชื่อหัวข้อ (ขยายขนาดข้อความชุดกระดาษให้ใหญ่อ่านง่ายขึ้น) */}
           <div className="flex items-center gap-3.5 min-w-0 w-full md:w-auto md:flex-1">
             <div
               role="img"
@@ -23,13 +24,13 @@ export function SiteHeader() {
               <p className="text-pretty text-xs sm:text-sm md:text-base font-semibold leading-snug text-primary">
                 สื่อการเรียนรู้ห้องปฏิบัติการเสมือน (Virtual Lab) - โรงเรียนหาดใหญ่วิทยาลัยสมบูรณ์กุลกันยา
               </p>
-              <h1 className="text-pretty text-[11px] sm:text-xs md:text-sm leading-snug text-foreground mt-0.5">
+              <h1 className="text-pretty text-xs sm:text-sm md:text-base font-medium leading-snug text-foreground mt-0.5">
                 ชุดกระดาษทดสอบจำแนกความเข้มข้นของสารด้วยระยะทางการเคลื่อนที่บนกระดาษจากสารสกัดแก่นฝาง
               </h1>
             </div>
           </div>
 
-          {/* ฝั่งขวา: ปุ่ม Green & Microscale Chemistry จัดเรียงสวยงามบนมือถือและเดสก์ท็อป */}
+          {/* ฝั่งขวา: ปุ่ม Green & Microscale Chemistry */}
           <ul className="flex flex-row items-center justify-end gap-2.5 w-full md:w-auto shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-800/80" aria-label="แนวคิดหลัก">
             <li>
               <button
