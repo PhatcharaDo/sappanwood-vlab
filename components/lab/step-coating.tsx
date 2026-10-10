@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils'
 import { PetriDish } from './glassware'
 import { Notice, Panel, ProgressBar, StepHeading } from './lab-ui'
 
-const TARGET_DROPS = 20 // 1 mL = 20 หยดตามมาตรฐาน
+const TARGET_DROPS = 20
 const STRIP_COUNT = 5
 
 type Props = {
@@ -83,7 +83,7 @@ function CoatingSet({ set, locked, done, onComplete }: CoatingSetProps) {
     if (locked || extractDrops >= TARGET_DROPS) return
     setDropping('extract')
     setTimeout(() => {
-      const randomBatch = Math.floor(Math.random() * 3) + 3 // สุ่ม 3-5 หยดต่อคลิก
+      const randomBatch = Math.floor(Math.random() * 3) + 3
       setExtractDrops((d) => Math.min(TARGET_DROPS, d + randomBatch))
       setDropping(null)
     }, 300)
@@ -93,7 +93,7 @@ function CoatingSet({ set, locked, done, onComplete }: CoatingSetProps) {
     if (locked || reagentDrops >= TARGET_DROPS) return
     setDropping('reagent')
     setTimeout(() => {
-      const randomBatch = Math.floor(Math.random() * 3) + 3 // สุ่ม 3-5 หยดต่อคลิก
+      const randomBatch = Math.floor(Math.random() * 3) + 3
       setReagentDrops((d) => Math.min(TARGET_DROPS, d + randomBatch))
       setDropping(null)
     }, 300)
@@ -169,7 +169,7 @@ function CoatingSet({ set, locked, done, onComplete }: CoatingSetProps) {
                 >
                   <span className="text-[10px] font-bold text-white/90 drop-shadow-md text-center leading-tight">
                     {totalDrops} หยด
-                    <span className="block font-normal">({(totalDrops / 20).toFixed(1)} mL)</span>
+                    <span className="block font-normal">{(totalDrops / 20).toFixed(1)} mL</span>
                   </span>
                 </div>
               )}
@@ -192,62 +192,4 @@ function CoatingSet({ set, locked, done, onComplete }: CoatingSetProps) {
                 variant="secondary"
                 size="lg"
                 onClick={addReagentDrop}
-                disabled={locked || dropping !== null || reagentDrops >= TARGET_DROPS}
-              >
-                <Pipette aria-hidden="true" />
-                {info.mixReagent} ({reagentDrops}/20)
-              </Button>
-            </div>
-            <dl className="grid grid-cols-2 gap-2 text-center">
-              <div className="rounded-lg border border-border bg-muted p-2">
-                <dt className="text-[11px] text-muted-foreground">สารสกัด ({(extractDrops / 20).toFixed(1)} mL)</dt>
-                <dd className="font-mono text-lg font-semibold text-primary">{extractDrops} หยด</dd>
-              </div>
-              <div className="rounded-lg border border-border bg-muted p-2">
-                <dt className="text-[11px] text-muted-foreground">{info.mixReagent} ({(reagentDrops / 20).toFixed(1)} mL)</dt>
-                <dd className="font-mono text-lg font-semibold text-primary">{reagentDrops} หยด</dd>
-              </div>
-            </dl>
-            <p className="text-xs text-muted-foreground leading-relaxed" aria-live="polite">
-              (ใช้สารสกัด 1 mL และรีเอเจนต์ 1 mL รวมเป็น 2 mL เต็มหลอด) <span className="text-foreground font-medium">(มาตรฐาน: 1 mL = 20 หยด)</span><br />
-              อัตราส่วน{' '}
-              <span className="font-mono text-foreground">
-                {extractDrops}:{reagentDrops}
-              </span>{' '}
-              {totalDrops === 0
-                ? '— หยดสารสกัดและรีเอเจนต์สลับกันให้สะสมครบอย่างละ 20 หยด'
-                : balanced
-                  ? `— ครบอัตราส่วน 1:1 (อย่างละ 1 mL) แล้ว สารละลายเปลี่ยนเป็น${set === 'A' ? 'สีแดง' : 'สีเหลือง'}`
-                  : '— กำลังผสม (หยดสลับสะสมให้ครบอย่างละ 20 หยด)'}
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <Button size="lg" onClick={() => setPhase('coat')} disabled={!balanced || locked}>
-                ยืนยันสารละลาย
-              </Button>
-              <Button size="lg" variant="outline" onClick={resetMix} disabled={locked || totalDrops === 0}>
-                <RotateCcw aria-hidden="true" />
-                เทผสมใหม่
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {phase === 'coat' && (
-        <div className="flex flex-col gap-4">
-          <p className="text-sm text-muted-foreground">คลิกที่กระดาษแต่ละแผ่นเพื่อจุ่ม/เคลือบด้วยสารละลาย (ครบ 5 แผ่น)</p>
-          <div className="flex items-end justify-center gap-4 rounded-xl bg-muted p-5">
-            {coated.map((isCoated, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => coatStrip(i)}
-                disabled={isCoated}
-                aria-label={`เคลือบกระดาษแผ่นที่ ${i + 1}${isCoated ? ' (เคลือบแล้ว)' : ''}`}
-                className={cn(
-                  'flex h-32 w-8 items-end justify-center rounded-sm border pb-1 font-mono text-[10px] transition-colors duration-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
-                  isCoated
-                    ? 'border-transparent text-white/85'
-                    : 'border-border bg-[#f5f1e8] text-slate-500 hover:ring-2 hover:ring-primary',
-                )}
-                style={isCoated ? { backgroundColor: info.paperColor, color: set === 'B' ? '#5
+                disabled={
