@@ -44,7 +44,8 @@ export function StepExtraction({ done, onComplete, onNext }: Props) {
 
   const tint = stage >= 3 ? 1 : 0.12 + stir.progress * 0.88
   const liquidColor = mixHex(ETHANOL_COLOR, EXTRACT_COLOR, stage >= 1 ? tint : 0)
-  const beakerLevel = (ethanolMl / 100) * 6 * (1 - filterProgress * 0.92)
+  // ปรับระดับความสูงภาพในบีกเกอร์ให้แสดงผลสวยงามพอดี (ระดับประมาณ 30 mL เดิม) โดยปริมาณสารยังคงเป็น 20.0 mL ตามจริง
+  const beakerLevel = (stage >= 2 ? 0.3 : pour.progress * 0.3) * (1 - filterProgress * 0.92)
 
   function addPowder() {
     if (stage === 0) setStage(1)
