@@ -1,61 +1,61 @@
 'use client'
 
 import { useState } from 'react'
-import { FlaskConical, Leaf, Shield, X, CheckCircle2, BookOpen } from 'lucide-react'
+import { FlaskConical, Leaf, Shield, X, CheckCircle2 } from 'lucide-react'
 
 export function SiteHeader() {
   const [activeModal, setActiveModal] = useState<'green' | 'micro' | null>(null)
 
   return (
     <>
-      <header className="border-b border-border bg-card/80 backdrop-blur sticky top-0 z-50">
-        <div className="mx-auto flex max-w-7xl flex-row items-center justify-between gap-3 px-3 py-3.5 md:px-6">
-          {/* โลโก้และชื่อหัวข้อ (ขยายให้ใหญ่และเด่นชัดขึ้น) */}
-          <div className="flex items-center gap-3.5 min-w-0 flex-1">
+      <header className="border-b border-border bg-card/60 backdrop-blur sticky top-0 z-50">
+        <div className="mx-auto flex max-w-7xl flex-row items-center justify-between gap-4 px-4 py-4 md:px-6">
+          {/* ฝั่งซ้าย: โลโก้ + ข้อความหัวข้อสไตล์รูปแรก */}
+          <div className="flex items-center gap-4 min-w-0 flex-1">
             <div
               role="img"
               aria-label="ตราสัญลักษณ์โรงเรียน"
-              className="flex size-11 sm:size-14 shrink-0 items-center justify-center rounded-full border-2 border-primary bg-background shadow-[0_0_8px_rgba(250,204,21,0.4)]"
+              className="flex size-14 shrink-0 items-center justify-center rounded-full border-2 border-primary bg-background shadow-[0_0_4px_rgba(250,204,21,0.3)]"
             >
-              <Shield className="size-6 sm:size-7 text-primary" aria-hidden="true" />
+              <Shield className="size-7 text-primary" aria-hidden="true" />
             </div>
-            <div className="min-w-0 flex-1 truncate">
-              <p className="text-pretty text-sm sm:text-base font-bold leading-tight text-primary truncate">
+            <div className="min-w-0">
+              <p className="text-pretty text-sm sm:text-base font-semibold leading-snug text-primary">
                 สื่อการเรียนรู้ห้องปฏิบัติการเสมือน (Virtual Lab) - โรงเรียนหาดใหญ่วิทยาลัยสมบูรณ์กุลกันยา
               </p>
-              <h1 className="text-pretty text-xs sm:text-sm font-medium leading-snug text-foreground/90 truncate mt-0.5">
+              <h1 className="text-pretty text-sm leading-snug text-foreground">
                 ชุดกระดาษทดสอบจำแนกความเข้มข้นของสารด้วยระยะทางการเคลื่อนที่บนกระดาษจากสารสกัดแก่นฝาง
               </h1>
             </div>
           </div>
 
-          {/* ปุ่ม Green & Microscale Chemistry (เพิ่มไอคอนหนังสือและป้ายบอกให้รู้ว่ากดอ่านได้ชัดเจนขึ้น) */}
+          {/* ฝั่งขวา: ปุ่ม Green & Microscale Chemistry แบบไม่มีไอคอนเพิ่ม แต่มี "(คลิกอ่าน)" อยู่บรรทัดล่างพร้อมขีดเส้นใต้ */}
           <ul className="flex shrink-0 items-center gap-2 sm:gap-3" aria-label="แนวคิดหลัก">
             <li>
               <button
                 onClick={() => setActiveModal('green')}
-                className="group inline-flex items-center gap-2 rounded-xl border border-success/50 bg-success/15 px-3 py-1.5 text-xs sm:text-sm font-semibold text-success transition-all hover:bg-success/25 hover:scale-105 active:scale-95 cursor-pointer whitespace-nowrap shadow-md shadow-success/10"
+                className="group flex flex-col items-center justify-center rounded-full border border-success/40 bg-success/10 px-4 py-1.5 text-xs font-medium text-success transition-all hover:bg-success/20 hover:scale-105 active:scale-95 cursor-pointer whitespace-nowrap shadow-sm"
               >
-                <Leaf className="size-4 group-hover:rotate-12 transition-transform" aria-hidden="true" />
-                <span className="flex items-center gap-1">
+                <span className="inline-flex items-center gap-1.5">
+                  <Leaf className="size-3.5" aria-hidden="true" />
                   Green Chemistry
-                  <span className="hidden md:inline-flex items-center gap-0.5 text-[10px] bg-success/30 px-1.5 py-0.5 rounded text-white ml-1">
-                    <BookOpen className="size-3" /> คลิกอ่าน
-                  </span>
+                </span>
+                <span className="text-[10px] text-success/80 underline underline-offset-2 font-normal group-hover:text-success">
+                  (คลิกอ่าน)
                 </span>
               </button>
             </li>
             <li>
               <button
                 onClick={() => setActiveModal('micro')}
-                className="group inline-flex items-center gap-2 rounded-xl border border-primary/50 bg-primary/15 px-3 py-1.5 text-xs sm:text-sm font-semibold text-primary transition-all hover:bg-primary/25 hover:scale-105 active:scale-95 cursor-pointer whitespace-nowrap shadow-md shadow-primary/10"
+                className="group flex flex-col items-center justify-center rounded-full border border-primary/40 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary transition-all hover:bg-primary/20 hover:scale-105 active:scale-95 cursor-pointer whitespace-nowrap shadow-sm"
               >
-                <FlaskConical className="size-4 group-hover:-rotate-12 transition-transform" aria-hidden="true" />
-                <span className="flex items-center gap-1">
+                <span className="inline-flex items-center gap-1.5">
+                  <FlaskConical className="size-3.5" aria-hidden="true" />
                   Microscale Chemistry
-                  <span className="hidden md:inline-flex items-center gap-0.5 text-[10px] bg-primary/30 px-1.5 py-0.5 rounded text-white ml-1">
-                    <BookOpen className="size-3" /> คลิกอ่าน
-                  </span>
+                </span>
+                <span className="text-[10px] text-primary/80 underline underline-offset-2 font-normal group-hover:text-primary">
+                  (คลิกอ่าน)
                 </span>
               </button>
             </li>
@@ -214,6 +214,18 @@ export function SiteHeader() {
                     <CheckCircle2 className="size-5 text-primary shrink-0" />
                     การประยุกต์ใช้ในระดับสากลและการศึกษา
                   </h4>
+                  <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                    ได้รับการยอมรับและส่งเสริมจากองค์กรการศึกษานานาชาติ (เช่น UNESCO และ IUPAC) เพื่อใช้ในการเรียนการสอนวิชาเคมี ช่วยให้นักเรียนฝึกฝนทักษะกระบวนการทางวิทยาศาสตร์ได้อย่างปลอดภัย สัมผัสประสบการณ์จริงได้ทั่วถึง และเป็นมิตรต่อสิ่งแวดล้อม
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}                  </h4>
                   <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
                     ได้รับการยอมรับและส่งเสริมจากองค์กรการศึกษานานาชาติ (เช่น UNESCO และ IUPAC) เพื่อใช้ในการเรียนการสอนวิชาเคมี ช่วยให้นักเรียนฝึกฝนทักษะกระบวนการทางวิทยาศาสตร์ได้อย่างปลอดภัย สัมผัสประสบการณ์จริงได้ทั่วถึง และเป็นมิตรต่อสิ่งแวดล้อม
                   </p>
