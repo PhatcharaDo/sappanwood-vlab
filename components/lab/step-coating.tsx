@@ -11,6 +11,7 @@ import { Notice, Panel, ProgressBar, StepHeading } from './lab-ui'
 
 const TARGET_DROPS = 20
 const STRIP_COUNT = 5
+const DROPS_PER_STRIP = 4
 
 type Props = {
   done: Record<SetId, boolean>
@@ -65,9 +66,9 @@ function CoatingSet({ set, locked, done, onComplete }: CoatingSetProps) {
   const [phase, setPhase] = useState<Phase>(done ? 'done' : 'mix')
   const [extractDrops, setExtractDrops] = useState(0)
   const [reagentDrops, setReagentDrops] = useState(0)
-  const [coated, setCoated] = useState<boolean[]>(Array(STRIP_COUNT).fill(done))
+  const [stripDrops, setStripDrops] = useState<number[]>(Array(STRIP_COUNT).fill(done ? DROPS_PER_STRIP : 0))
   const [method, setMethod] = useState<DryMethod>('oven')
-  const [dropping, setDropping] = useState<'extract' | 'reagent' | null>(null)
+  const [dropping, setDropping] = useState<'extract' | 'reagent' | 'strip' | null>(null)
 
   const dry = useTimedProgress(3500, () => {
     setPhase('done')
@@ -105,10 +106,17 @@ function CoatingSet({ set, locked, done, onComplete }: CoatingSetProps) {
   }
 
   function coatStrip(index: number) {
-    setCoated((prev) => prev.map((value, i) => (i === index ? true : value)))
+    if (stripDrops[index] >= DROPS_PER_STRIP) return
+    setDropping('strip')
+    setTimeout(() => {
+      setStripDrops((prev) =>
+        prev.map((val, i) => (i === index ? Math.min(DROPS_PER_STRIP, val + 1) : val)),
+      )
+      setDropping(null)
+    }, 200)
   }
 
-  const allCoated = coated.every(Boolean)
+  const allCoated = stripDrops.every((d) => d === DROPS_PER_STRIP)
   const phaseIndex = ['mix', 'coat', 'dry', 'done'].indexOf(phase)
 
   return (
@@ -149,13 +157,12 @@ function CoatingSet({ set, locked, done, onComplete }: CoatingSetProps) {
 
       {phase === 'mix' && (
         <div className="relative grid gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] sm:items-center">
-          {dropping && (
+          {dropping && dropping !== 'strip' && (
             <div className="absolute top-4 left-1/4 z-20 flex flex-col items-center animate-bounce">
               <Pipette className="size-8 text-primary drop-shadow-[0_0_6px_rgba(250,204,21,0.8)] rotate-180" />
             </div>
           )}
 
-          {/* หลอดเอเพนดอร์ฟ 2 mL (ว่างเปล่าเมื่อ 0 หยด) */}
           <div className="flex flex-col items-center gap-2">
             <div className="relative flex h-48 w-20 flex-col justify-end overflow-hidden rounded-b-2xl rounded-t-md border-2 border-slate-400/60 bg-slate-900/40 p-1 shadow-inner">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 h-4 w-12 rounded-t-md bg-slate-500 border border-slate-300" />
@@ -209,7 +216,7 @@ function CoatingSet({ set, locked, done, onComplete }: CoatingSetProps) {
               </div>
             </dl>
             <p className="text-xs text-muted-foreground leading-relaxed" aria-live="polite">
-              ใช้สารสกัด 1 mL และรีเอเจนต์ 1 mL รวมเป็น 2 mL เต็มหลอด (มาตรฐาน: 1 mL = 20 หยด)<br />
+              (ใช้สารสกัด 1 mL และรีเอเจนต์ 1 mL รวมเป็น 2 mL เต็มหลอด; มาตรฐาน: 1 mL = 20 หยด)<br />
               อัตราส่วน{' '}
               <span className="font-mono text-foreground">
                 {extractDrops}:{reagentDrops}
@@ -235,26 +242,52 @@ function CoatingSet({ set, locked, done, onComplete }: CoatingSetProps) {
 
       {phase === 'coat' && (
         <div className="flex flex-col gap-4">
-          <p className="text-sm text-muted-foreground">คลิกที่กระดาษแต่ละแผ่นเพื่อจุ่ม/เคลือบด้วยสารละลาย (ครบ 5 แผ่น)</p>
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              คลิกหยดสารละลายลงบนกระดาษแต่ละแผ่น <span className="text-foreground font-medium">(แผ่นละ 4 หยด จากล่างขึ้นบนจนเต็ม)</span>
+            </p>
+            {dropping === 'strip' && (
+              <span className="flex items-center gap-1 text-xs text-primary animate-pulse font-medium">
+                <Pipette className="size-4 animate-bounce rotate-180" /> กำลังหยดสาร...
+              </span>
+            )}
+          </div>
           <div className="flex items-end justify-center gap-4 rounded-xl bg-muted p-5">
-            {coated.map((isCoated, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => coatStrip(i)}
-                disabled={isCoated}
-                aria-label={`เคลือบกระดาษแผ่นที่ ${i + 1}${isCoated ? ' (เคลือบแล้ว)' : ''}`}
-                className={cn(
-                  'flex h-32 w-8 items-end justify-center rounded-sm border pb-1 font-mono text-[10px] transition-colors duration-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
-                  isCoated
-                    ? 'border-transparent text-white/85'
-                    : 'border-border bg-[#f5f1e8] text-slate-500 hover:ring-2 hover:ring-primary',
-                )}
-                style={isCoated ? { backgroundColor: info.paperColor, color: set === 'B' ? '#5b4300' : undefined } : undefined}
-              >
-                {i + 1}
-              </button>
-            ))}
+            {stripDrops.map((drops, i) => {
+              const isFinished = drops === DROPS_PER_STRIP
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => coatStrip(i)}
+                  disabled={isFinished}
+                  aria-label={`เคลือบกระดาษแผ่นที่ ${i + 1} (${drops}/${DROPS_PER_STRIP} หยด)`}
+                  className={cn(
+                    'relative flex h-36 w-10 flex-col justify-end overflow-hidden rounded-md border p-1 transition-all duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
+                    isFinished
+                      ? 'border-transparent shadow-md'
+                      : 'border-border bg-[#f5f1e8] hover:ring-2 hover:ring-primary',
+                  )}
+                >
+                  <div
+                    className="absolute bottom-0 left-0 w-full transition-all duration-300 rounded-b-sm flex items-center justify-center"
+                    style={{
+                      height: `${(drops / DROPS_PER_STRIP) * 100}%`,
+                      backgroundColor: info.paperColor,
+                    }}
+                  >
+                    {drops > 0 && (
+                      <span className="text-[10px] font-bold text-slate-900 drop-shadow-sm z-10">
+                        {drops}/4
+                      </span>
+                    )}
+                  </div>
+                  <span className="absolute inset-x-0 bottom-1 text-center font-mono text-[10px] font-semibold text-slate-600 z-20">
+                    {i + 1}
+                  </span>
+                </button>
+              )
+            })}
           </div>
           <Button size="lg" onClick={() => setPhase('dry')} disabled={!allCoated} className="self-start">
             เคลือบครบแล้ว นำไปทำให้แห้ง
@@ -303,7 +336,7 @@ function CoatingSet({ set, locked, done, onComplete }: CoatingSetProps) {
               </span>
             </div>
             <div className="flex gap-1" aria-hidden="true">
-              {coated.map((_, i) => (
+              {stripDrops.map((_, i) => (
                 <span
                   key={i}
                   className="h-12 w-3 rounded-sm transition-opacity"
