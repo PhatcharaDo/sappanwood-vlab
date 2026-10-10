@@ -83,7 +83,7 @@ function CoatingSet({ set, locked, done, onComplete }: CoatingSetProps) {
     if (locked || extractDrops >= TARGET_DROPS) return
     setDropping('extract')
     setTimeout(() => {
-      const randomBatch = Math.floor(Math.random() * 3) + 3 // สุ่ม 3-5 หยดต่อการคลิก 1 ครั้ง
+      const randomBatch = Math.floor(Math.random() * 3) + 3 // สุ่ม 3-5 หยดต่อคลิก
       setExtractDrops((d) => Math.min(TARGET_DROPS, d + randomBatch))
       setDropping(null)
     }, 300)
@@ -93,7 +93,7 @@ function CoatingSet({ set, locked, done, onComplete }: CoatingSetProps) {
     if (locked || reagentDrops >= TARGET_DROPS) return
     setDropping('reagent')
     setTimeout(() => {
-      const randomBatch = Math.floor(Math.random() * 3) + 3 // สุ่ม 3-5 หยดต่อการคลิก 1 ครั้ง
+      const randomBatch = Math.floor(Math.random() * 3) + 3 // สุ่ม 3-5 หยดต่อคลิก
       setReagentDrops((d) => Math.min(TARGET_DROPS, d + randomBatch))
       setDropping(null)
     }, 300)
@@ -155,7 +155,7 @@ function CoatingSet({ set, locked, done, onComplete }: CoatingSetProps) {
             </div>
           )}
 
-          {/* หลอดเอเพนดอร์ฟ 2 mL (ว่างเปล่าเมื่อ 0 หยด ไม่มีสีขาว) */}
+          {/* หลอดเอเพนดอร์ฟ 2 mL (ว่างเปล่าเมื่อ 0 หยด) */}
           <div className="flex flex-col items-center gap-2">
             <div className="relative flex h-48 w-20 flex-col justify-end overflow-hidden rounded-b-2xl rounded-t-md border-2 border-slate-400/60 bg-slate-900/40 p-1 shadow-inner">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 h-4 w-12 rounded-t-md bg-slate-500 border border-slate-300" />
@@ -245,4 +245,34 @@ function CoatingSet({ set, locked, done, onComplete }: CoatingSetProps) {
                 aria-label={`เคลือบกระดาษแผ่นที่ ${i + 1}${isCoated ? ' (เคลือบแล้ว)' : ''}`}
                 className={cn(
                   'flex h-32 w-8 items-end justify-center rounded-sm border pb-1 font-mono text-[10px] transition-colors duration-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
-                  isCoated ? 'border-transparent text-white/80' : 'border-border bg-[#f5f1e8] text-slate-
+                  isCoated
+                    ? 'border-transparent text-white/85'
+                    : 'border-border bg-[#f5f1e8] text-slate-500 hover:ring-2 hover:ring-primary',
+                )}
+                style={isCoated ? { backgroundColor: info.paperColor, color: set === 'B' ? '#5b4300' : undefined } : undefined}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
+          <Button size="lg" onClick={() => setPhase('dry')} disabled={!allCoated} className="self-start">
+            เคลือบครบแล้ว นำไปทำให้แห้ง
+          </Button>
+        </div>
+      )}
+
+      {phase === 'dry' && (
+        <div className="flex flex-col gap-4">
+          <fieldset className="flex flex-col gap-2" disabled={dry.running}>
+            <legend className="mb-2 text-sm text-muted-foreground">เลือกวิธีทำให้กระดาษแห้ง</legend>
+            <div className="grid grid-cols-2 gap-2">
+              {(Object.keys(DRY_METHODS) as DryMethod[]).map((key) => {
+                const Icon = DRY_METHODS[key].icon
+                return (
+                  <label
+                    key={key}
+                    className={cn(
+                      'flex cursor-pointer items-center gap-2 rounded-lg border p-3 text-sm has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-ring',
+                      method === key ? 'border-primary bg-primary/10 text-foreground' : 'border-border text-muted-foreground',
+                    )}
+                  >
