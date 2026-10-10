@@ -155,7 +155,7 @@ function CoatingSet({ set, locked, done, onComplete }: CoatingSetProps) {
             </div>
           )}
 
-          {/* หลอดเอเพนดอร์ฟ 2 mL (ว่างเปล่าเมื่อ 0 หยด ไม่มีสีขาว) */}
+          {/* หลอดเอเพนดอร์ฟ 2 mL (ว่างเปล่าเมื่อ 0 หยด) */}
           <div className="flex flex-col items-center gap-2">
             <div className="relative flex h-48 w-20 flex-col justify-end overflow-hidden rounded-b-2xl rounded-t-md border-2 border-slate-400/60 bg-slate-900/40 p-1 shadow-inner">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 h-4 w-12 rounded-t-md bg-slate-500 border border-slate-300" />
@@ -248,3 +248,22 @@ function CoatingSet({ set, locked, done, onComplete }: CoatingSetProps) {
                   isCoated
                     ? 'border-transparent text-white/85'
                     : 'border-border bg-[#f5f1e8] text-slate-500 hover:ring-2 hover:ring-primary',
+                )}
+                style={isCoated ? { backgroundColor: info.paperColor, color: set === 'B' ? '#5b4300' : undefined } : undefined}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
+          <Button size="lg" onClick={() => setPhase('dry')} disabled={!allCoated} className="self-start">
+            เคลือบครบแล้ว นำไปทำให้แห้ง
+          </Button>
+        </div>
+      )}
+
+      {phase === 'dry' && (
+        <div className="flex flex-col gap-4">
+          <fieldset className="flex flex-col gap-2" disabled={dry.running}>
+            <legend className="mb-2 text-sm text-muted-foreground">เลือกวิธีทำให้กระดาษแห้ง</legend>
+            <div className="grid grid-cols-2 gap-2">
+              {(Object.keys(
