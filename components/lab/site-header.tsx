@@ -10,7 +10,7 @@ export function SiteHeader() {
     <>
       <header className="border-b border-border bg-card/60 backdrop-blur sticky top-0 z-50">
         <div className="mx-auto flex max-w-7xl flex-row items-center justify-between gap-4 px-4 py-4 md:px-6">
-          {/* ฝั่งซ้าย: โลโก้ + ข้อความหัวข้อสไตล์รูปแรก */}
+          {/* ฝั่งซ้าย: โลโก้ + ข้อความหัวข้อสไตล์ดั้งเดิมที่อ่านง่ายและชัดเจน */}
           <div className="flex items-center gap-4 min-w-0 flex-1">
             <div
               role="img"
@@ -29,7 +29,7 @@ export function SiteHeader() {
             </div>
           </div>
 
-          {/* ฝั่งขวา: ปุ่ม Green & Microscale Chemistry แบบไม่มีไอคอนเพิ่ม แต่มี "(คลิกอ่าน)" อยู่บรรทัดล่างพร้อมขีดเส้นใต้ */}
+          {/* ฝั่งขวา: ปุ่ม Green & Microscale Chemistry แบบไม่มีรูป มีคำว่า (คลิกอ่าน) ขีดเส้นใต้ด้านล่าง */}
           <ul className="flex shrink-0 items-center gap-2 sm:gap-3" aria-label="แนวคิดหลัก">
             <li>
               <button
@@ -214,18 +214,6 @@ export function SiteHeader() {
                     <CheckCircle2 className="size-5 text-primary shrink-0" />
                     การประยุกต์ใช้ในระดับสากลและการศึกษา
                   </h4>
-                  <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                    ได้รับการยอมรับและส่งเสริมจากองค์กรการศึกษานานาชาติ (เช่น UNESCO และ IUPAC) เพื่อใช้ในการเรียนการสอนวิชาเคมี ช่วยให้นักเรียนฝึกฝนทักษะกระบวนการทางวิทยาศาสตร์ได้อย่างปลอดภัย สัมผัสประสบการณ์จริงได้ทั่วถึง และเป็นมิตรต่อสิ่งแวดล้อม
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  )
-}                  </h4>
                   <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
                     ได้รับการยอมรับและส่งเสริมจากองค์กรการศึกษานานาชาติ (เช่น UNESCO และ IUPAC) เพื่อใช้ในการเรียนการสอนวิชาเคมี ช่วยให้นักเรียนฝึกฝนทักษะกระบวนการทางวิทยาศาสตร์ได้อย่างปลอดภัย สัมผัสประสบการณ์จริงได้ทั่วถึง และเป็นมิตรต่อสิ่งแวดล้อม
                   </p>
