@@ -3,7 +3,7 @@
 import { ChartLine, Eye, EyeOff, RotateCcw, Ruler } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { CONCENTRATIONS, EXPECTED_DISTANCE, SET_IDS, SET_INFO, type SetId, TOLERANCE_MM } from '@/lib/lab'
+import { CONCENTRATIONS, SET_IDS, SET_INFO, type SetId, TOLERANCE_MM } from '@/lib/lab'
 import { cn } from '@/lib/utils'
 import { DistanceChart } from './distance-chart'
 import { Notice, Panel, StepHeading } from './lab-ui'
@@ -14,10 +14,11 @@ type CellError = 'missing' | 'invalid' | 'off'
 const emptyInputs = (): Record<SetId, string[]> => ({ A: Array(5).fill(''), B: Array(5).fill('') })
 
 type Props = {
+  distances: Record<SetId, number[]>
   onComplete: () => void
 }
 
-export function StepMeasurement({ onComplete }: Props) {
+export function StepMeasurement({ distances, onComplete }: Props) {
   const [inputs, setInputs] = useState(emptyInputs)
   const [errors, setErrors] = useState<Record<string, CellError>>({})
   const [plotted, setPlotted] = useState<Record<SetId, number[]> | null>(null)
@@ -41,9 +42,10 @@ export function StepMeasurement({ onComplete }: Props) {
       inputs[set].forEach((raw, i) => {
         const value = Number(raw.trim().replace(',', '.'))
         const key = `${set}-${i}`
+        const actualDistance = distances[set][i] // ใช้ค่าสุ่มจริงที่ส่งมาจาก VirtualLab
         if (raw.trim() === '') found[key] = 'missing'
         else if (!Number.isFinite(value) || value < 0) found[key] = 'invalid'
-        else if (Math.abs(value - EXPECTED_DISTANCE[set][i]) > TOLERANCE_MM) found[key] = 'off'
+        else if (Math.abs(value - actualDistance) > TOLERANCE_MM) found[key] = 'off'
         parsed[set].push(value)
       })
     }
@@ -146,7 +148,7 @@ export function StepMeasurement({ onComplete }: Props) {
                 {counts.missing > 0 && <li>ยังไม่ได้กรอกข้อมูล {counts.missing} ช่อง</li>}
                 {counts.invalid > 0 && <li>กรอกค่าที่ไม่ใช่ตัวเลขหรือติดลบ {counts.invalid} ช่อง</li>}
                 {counts.off > 0 && (
-                  <li>ค่าระยะทางคลาดเคลื่อนมากเกินไป {counts.off} ช่อง — กลับไปวัดใหม่ด้วยไม้บรรทัด</li>
+                  <li>ค่าระยะทางคลาดเคลื่อนเกิน ±1 mm จากผลการทดลองจริง {counts.off} ช่อง — กลับไปวัดใหม่ด้วยไม้บรรทัด</li>
                 )}
               </ul>
             </Notice>
@@ -211,7 +213,7 @@ export function StepMeasurement({ onComplete }: Props) {
               {showHint ? 'ซ่อนตำแหน่งที่ถูกต้อง' : 'แสดงตำแหน่งที่ถูกต้องบนไม้บรรทัด (สีแดง)'}
             </Button>
           </div>
-          <TestBench key={lookbackSet} set={lookbackSet} tested={Array(5).fill(true)} showHint={showHint} />
+          <TestBench key={lookbackSet} set={lookbackSet} tested={Array(5).fill(true)} distances={distances[lookbackSet]} showHint={showHint} />
           <p className="text-xs text-muted-foreground">ลากไม้บรรทัดไปวางข้างแถบกระดาษเพื่อวัดซ้ำ เส้นสีแดงบนไม้บรรทัดคือตำแหน่งขอบสีที่ถูกต้องของแต่ละความเข้มข้น</p>
         </Panel>
       )}
