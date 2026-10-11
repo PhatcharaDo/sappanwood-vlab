@@ -1,6 +1,6 @@
 'use client'
 
-import { Beaker, CheckCircle2, Trophy, XCircle, Award } from 'lucide-react'
+import { Beaker, CheckCircle2, Trophy, XCircle } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Notice, Panel, StepHeading } from './lab-ui'
@@ -17,11 +17,10 @@ const ITEMS = [
 type Props = {
   testedMap: Record<string, boolean>
   setTestedMap: React.Dispatch<React.SetStateAction<Record<string, boolean>>>
-  onCompleteCourse: () => void
   onBack: () => void
 }
 
-export function StepHousehold({ testedMap, setTestedMap, onCompleteCourse, onBack }: Props) {
+export function StepHousehold({ testedMap, setTestedMap, onBack }: Props) {
   const [samples] = useState(() => [...ITEMS])
   const [selected, setSelected] = useState(samples[0])
   const [chosenSet, setChosenSet] = useState<'A' | 'B' | null>(() => {
@@ -59,12 +58,10 @@ export function StepHousehold({ testedMap, setTestedMap, onCompleteCourse, onBac
               <p className="text-xs text-muted-foreground">เข้าใจหลักการทำงานของกระดาษ µPADs สกัดแก่นฝางและการประยุกต์ใช้จริง</p>
             </div>
           </div>
-          <div className="flex gap-2">
-            <Button onClick={onCompleteCourse} className="bg-green-600 text-white hover:bg-green-700 gap-2">
-              <Award className="size-4" /> ไปหน้าจบหลักสูตร & ใบประกาศ
-            </Button>
-            <Button variant="outline" onClick={onBack}>กลับหน้าหลักแล็บ</Button>
-          </div>
+          {/* มีเฉพาะปุ่มกลับหน้าหลักแล็บเพียงอย่างเดียว */}
+          <Button onClick={onBack} className="bg-green-600 text-white hover:bg-green-700">
+            กลับสู่หน้าหลัก Virtual Lab
+          </Button>
         </Notice>
       )}
 
@@ -147,10 +144,6 @@ export function StepHousehold({ testedMap, setTestedMap, onCompleteCourse, onBac
               <p className="mt-1 text-xs text-success-foreground/90">{selected.desc}</p>
             </Notice>
           )}
-
-          <Button variant="outline" size="sm" onClick={onBack} className="mt-2">
-            ← กลับสู่หน้าหลัก Virtual Lab
-          </Button>
         </Panel>
       </div>
     </div>
