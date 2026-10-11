@@ -12,9 +12,9 @@ import { StepNav } from './step-nav'
 import { StepTesting } from './step-testing'
 import { StepHousehold } from './step-household'
 import { Button } from '@/components/ui/button'
-import { Beaker, Unlock } from 'lucide-react'
+import { Beaker, Unlock, Award, FileText, Mail, Phone, User, CheckCircle2, ArrowLeft } from 'lucide-react'
 
-// ฟังก์ชันสร้างค่าสุ่มระยะทางกลาง (เรียงลำดับจากน้อยไปมากตามความเข้มข้น)
+// ฟังก์ชันสร้างค่าสุ่มระยะทางกลาง
 function generateRandomDistances() {
   const distances: number[] = []
   let current = Math.floor(Math.random() * 6) + 12
@@ -36,7 +36,11 @@ export function VirtualLab() {
   const [graphed, setGraphed] = useState(false)
   const [showHousehold, setShowHousehold] = useState(false)
   
-  // สถานะสำหรับเปิด/ปิดโหมดปลดล็อกทุกขั้นตอนเพื่อการทดสอบด่วน
+  // ยกสถานะของ Household Testing มาไว้ที่นี่ เพื่อให้คงสถานะไว้เวลาเข้า-ออก
+  const [householdTestedMap, setHouseholdTestedMap] = useState<Record<string, boolean>>({})
+  // สถานะแสดงหน้าจบหลักสูตร (ใบอบรม, ใบงาน, ติดต่อผู้พัฒนา)
+  const [showCompletion, setShowCompletion] = useState(false)
+
   const [isBypassed, setIsBypassed] = useState(false)
 
   const [randomDistances] = useState<Record<SetId, number[]>>({
@@ -44,7 +48,6 @@ export function VirtualLab() {
     B: generateRandomDistances(),
   })
 
-  // ถ้าเปิด Bypass จะถือว่าทุกขั้นตอนเสร็จสมบูรณ์แล้ว สามารถกดสลับดูได้อิสระ
   const completed = isBypassed
     ? [true, true, true, true]
     : [
@@ -56,21 +59,97 @@ export function VirtualLab() {
 
   function goTo(step: number) {
     setShowHousehold(false)
+    setShowCompletion(false)
     setActive(step)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   function handleBypassToggle() {
     if (!isBypassed) {
-      // เมื่อกดเปิด ให้ปลดล็อกสถานะทุกหน้าให้อัตโนมัติทันที
       setExtracted(true)
       setCoated({ A: true, B: true })
       setTested({ A: Array(5).fill(true), B: Array(5).fill(true) })
       setGraphed(true)
+      // เปิด Bypass ให้ถือว่าทดสอบสารครัวเรือนครบทั้งหมดแล้วด้วย
+      setHouseholdTestedMap({ vinegar: true, lime: true, 'baking-soda': true, 'soapy-water': true })
     }
     setIsBypassed((prev) => !prev)
   }
 
+  // หากอยู่ในหน้าจบหลักสูตร
+  if (showCompletion) {
+    return (
+      <div className="flex min-h-dvh flex-col">
+        <SiteHeader />
+        <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-4 py-8 md:px-6">
+          <div className="flex items-center justify-between">
+            <Button variant="outline" size="sm" onClick={() => setShowCompletion(false)} className="gap-2">
+              <ArrowLeft className="size-4" /> กลับสู่หน้าแล็บ
+            </Button>
+            <h1 className="text-xl font-bold text-foreground">🎉 หน้าสรุปผลและจบหลักสูตร Virtual Lab</h1>
+          </div>
+
+          {/* 1. ใบประกาศนียบัตร / ใบอบรม */}
+          <section className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-card to-amber-500/5 p-8 text-center shadow-xl">
+            <Award className="mx-auto size-16 text-amber-500 mb-3" />
+            <span className="rounded-full bg-amber-500/20 px-3 py-1 text-xs font-semibold text-amber-400">Certificate of Completion</span>
+            <h2 className="mt-4 text-2xl font-bold text-foreground">ใบประกาศนียบัตรผ่านการอบรมเชิงปฏิบัติการ</h2>
+            <p className="mt-2 text-sm text-muted-foreground">ขอรับรองว่าผู้ใช้งานได้ผ่านการทดลองและปฏิบัติการเสมือนจริง</p>
+            <div className="my-6 inline-block rounded-xl border border-border bg-background/50 px-6 py-3">
+              <p className="text-sm font-semibold text-primary">ห้องปฏิบัติการเสมือน (Virtual Lab): µPADs สกัดแก่นฝางและการทดสอบสาร</p>
+              <p className="text-xs text-muted-foreground mt-1">รางวัล DOW-CST Award ประจำปี พ.ศ. 2569</p>
+            </div>
+            <div>
+              <Button onClick={() => window.print()} className="bg-amber-600 hover:bg-amber-700 text-white">
+                📥 พิมพ์ / บันทึกใบประกาศนียบัตร
+              </Button>
+            </div>
+          </section>
+
+          {/* 2. ส่วนของใบงาน (Worksheet) */}
+          <section className="rounded-2xl border border-border bg-card p-6 shadow-md">
+            <div className="flex items-center gap-3 mb-4">
+              <FileText className="size-6 text-primary" />
+              <h3 className="text-lg font-semibold text-foreground">เอกสารใบงานการทดลอง (Worksheet & Reports)</h3>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">ดาวน์โหลดสรุปผลการทดลอง ระยะการเคลื่อนที่ และกราฟความเข้มข้นเพื่อใช้ประกอบรายงาน</p>
+            <Button variant="outline" className="gap-2">
+              📄 ดาวน์โหลดไฟล์ใบงานสรุปผลการทดลอง (.PDF)
+            </Button>
+          </section>
+
+          {/* 3. ช่องทางการติดต่อผู้พัฒนา */}
+          <section className="rounded-2xl border border-border bg-card p-6 shadow-md">
+            <div className="flex items-center gap-3 mb-4">
+              <User className="size-6 text-primary" />
+              <h3 className="text-lg font-semibold text-foreground">ข้อมูลผู้พัฒนาโครงการ (Developer Contacts)</h3>
+            </div>
+            <div className="grid gap-3 text-sm text-muted-foreground md:grid-cols-2">
+              <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-muted/30 p-3">
+                <User className="size-4 text-primary" />
+                <span>ผู้พัฒนา: พชร ดวงอุปะ (James) - ม.6/2</span>
+              </div>
+              <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-muted/30 p-3">
+                <span className="text-xs font-semibold text-primary">โรงเรียน:</span>
+                <span>หาดใหญ่วิทยาลัยสมบูรณ์กุลกัญญา (Hatyaiwittayalaisomboonkulkanya School)</span>
+              </div>
+              <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-muted/30 p-3">
+                <Mail className="size-4 text-primary" />
+                <span>อีเมลติดต่อ: phatchara@example.com</span>
+              </div>
+              <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-muted/30 p-3">
+                <Phone className="size-4 text-primary" />
+                <span>โทรศัพท์: 08x-xxx-xxxx</span>
+              </div>
+            </div>
+          </section>
+        </main>
+        <SiteFooter />
+      </div>
+    )
+  }
+
+  // หากอยู่ในหน้า Household Testing
   if (showHousehold) {
     return (
       <div className="flex min-h-dvh flex-col">
@@ -87,7 +166,12 @@ export function VirtualLab() {
               {isBypassed ? 'ปิดโหมดปลดล็อก (Bypass On)' : 'เปิดโหมดปลดล็อกทุกขั้นตอน (Bypass Off)'}
             </Button>
           </div>
-          <StepHousehold onBack={() => setShowHousehold(false)} />
+          <StepHousehold
+            testedMap={householdTestedMap}
+            setTestedMap={setHouseholdTestedMap}
+            onCompleteCourse={() => setShowCompletion(true)}
+            onBack={() => setShowHousehold(false)}
+          />
         </main>
         <SiteFooter />
       </div>
@@ -98,7 +182,6 @@ export function VirtualLab() {
     <div className="flex min-h-dvh flex-col">
       <SiteHeader />
       <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-6 md:px-6 md:py-8">
-        {/* ปุ่มเปิด/ปิดโหมดปลดล็อกพิเศษ */}
         <div className="flex items-center justify-between">
           <div className="text-xs text-muted-foreground">
             {isBypassed && <span className="rounded bg-amber-500/20 px-2 py-1 font-semibold text-amber-400">⚡ กำลังเปิดโหมดปลดล็อกทุกขั้นตอน</span>}
@@ -147,11 +230,19 @@ export function VirtualLab() {
               onComplete={() => setGraphed(true)}
             />
             {(graphed || isBypassed) && (
-              <div className="mt-6 flex justify-center">
+              <div className="mt-6 flex flex-col items-center gap-3">
                 <Button size="lg" className="gap-2 bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-lg hover:from-orange-700 hover:to-amber-700" onClick={() => setShowHousehold(true)}>
                   <Beaker className="size-5" />
                   ไปสู่การทดลองพิเศษ: สารในครัวเรือน (Household Testing)
                 </Button>
+
+                {/* ปุ่มจบหลักสูตร (จะแสดงเมื่อทดสอบสารในครัวเรือนครบแล้ว หรือเปิด Bypass) */}
+                {(Object.values(householdTestedMap).filter(Boolean).length === 4 || isBypassed) && (
+                  <Button size="lg" variant="default" className="gap-2 bg-green-600 text-white hover:bg-green-700 shadow-lg animate-bounce" onClick={() => setShowCompletion(true)}>
+                    <Award className="size-5" />
+                    🎓 จบหลักสูตร / ดูใบประกาศนียบัตร & ใบงาน
+                  </Button>
+                )}
               </div>
             )}
           </section>
