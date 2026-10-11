@@ -1,7 +1,7 @@
 'use client'
 
 import { ChartLine, Eye, EyeOff, RotateCcw, Ruler } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { CONCENTRATIONS, SET_IDS, SET_INFO, type SetId, TOLERANCE_MM } from '@/lib/lab'
 import { cn } from '@/lib/utils'
@@ -19,12 +19,48 @@ type Props = {
 }
 
 export function StepMeasurement({ distances, onComplete }: Props) {
-  const [inputs, setInputs] = useState(emptyInputs)
+  // โหลดข้อมูลตารางจาก sessionStorage เพื่อคงสภาพเดิมเวลาสลับหน้า
+  const [inputs, setInputs] = useState<Record<SetId, string[]>>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = sessionStorage.getItem('lab_measurement_inputs_v2')
+        if (saved) return JSON.parse(saved)
+      } catch (e) {
+        // ignore
+      }
+    }
+    return emptyInputs()
+  })
+
+  // โหลดสถานะกราฟจาก sessionStorage
+  const [plotted, setPlotted] = useState<Record<SetId, number[]> | null>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = sessionStorage.getItem('lab_measurement_plotted_v2')
+        if (saved) return JSON.parse(saved)
+      } catch (e) {
+        // ignore
+      }
+    }
+    return null
+  })
+
   const [errors, setErrors] = useState<Record<string, CellError>>({})
-  const [plotted, setPlotted] = useState<Record<SetId, number[]> | null>(null)
   const [showLookback, setShowLookback] = useState(false)
   const [showHint, setShowHint] = useState(false)
   const [lookbackSet, setLookbackSet] = useState<SetId>('A')
+
+  // บันทึกลง sessionStorage อัตโนมัติทุกครั้งที่มีการเปลี่ยนแปลง
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('lab_measurement_inputs_v2', JSON.stringify(inputs))
+      if (plotted) {
+        sessionStorage.setItem('lab_measurement_plotted_v2', JSON.stringify(plotted))
+      } else {
+        sessionStorage.removeItem('lab_measurement_plotted_v2')
+      }
+    }
+  }, [inputs, plotted])
 
   function updateCell(set: SetId, index: number, value: string) {
     setInputs((prev) => ({ ...prev, [set]: prev[set].map((v, i) => (i === index ? value : v)) }))
@@ -62,6 +98,10 @@ export function StepMeasurement({ distances, onComplete }: Props) {
     setInputs(emptyInputs())
     setErrors({})
     setPlotted(null)
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('lab_measurement_inputs_v2')
+      sessionStorage.removeItem('lab_measurement_plotted_v2')
+    }
   }
 
   const errorEntries = Object.entries(errors)
