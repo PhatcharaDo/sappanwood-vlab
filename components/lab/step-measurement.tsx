@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { CONCENTRATIONS, type SetId } from '@/lib/lab'
 import { Notice, Panel, StepHeading } from './lab-ui'
-import { CheckCircle2, RotateCcw, TrendingUp } from 'lucide-react'
+import { CheckCircle2, RotateCcw, TrendingUp, Eye, EyeOff } from 'lucide-react'
 
 type StepMeasurementProps = {
   distances: Record<SetId, number[]>
@@ -12,47 +12,80 @@ type StepMeasurementProps = {
 }
 
 export function StepMeasurement({ distances, onComplete }: StepMeasurementProps) {
-  // บันทึกสถานะการพล็อตกราฟลงใน sessionStorage เพื่อไม่ให้หายเวลากลับมาจากหน้าครัวเรือน
-  const [graphed, setGraphed] = useState<boolean>(() => {
+  // โหลดข้อมูลตารางและสถานะกราฟจาก sessionStorage เพื่อให้คงอยู่เวลาสลับหน้าไปมา
+  const [inputs, setInputs] = useState<Record<SetId, Record<number, string>>>(() => {
     if (typeof window !== 'undefined') {
-      const saved = sessionStorage.getItem('lab_graphed_state')
+      const saved = sessionStorage.getItem('lab_measurement_inputs')
       if (saved) {
-        try {
-          return JSON.parse(saved)
-        } catch (e) {
-          /* ignore */
-        }
+        try { return JSON.parse(saved) } catch (e) { /* ignore */ }
+      }
+    }
+    return { A: {}, B: {} }
+  })
+
+  const [hasPlotted, setHasPlotted] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('lab_measurement_plotted')
+      if (saved) {
+        try { return JSON.parse(saved) } catch (e) { /* ignore */ }
       }
     }
     return false
   })
 
+  const [showStep3Ref, setShowStep3Ref] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  // บันทึกลง sessionStorage อัตโนมัติทุกครั้งที่มีการกรอกข้อมูลหรือพล็อตกราฟ
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      sessionStorage.setItem('lab_graphed_state', JSON.stringify(graphed))
+      sessionStorage.setItem('lab_measurement_inputs', JSON.stringify(inputs))
+      sessionStorage.setItem('lab_measurement_plotted', JSON.stringify(hasPlotted))
     }
-  }, [graphed])
+  }, [inputs, hasPlotted])
 
-  const handlePlot = () => {
-    setGraphed(true)
+  const handleInputChange = (set: SetId, conc: number, value: string) => {
+    setInputs((prev) => ({
+      ...prev,
+      [set]: {
+        ...prev[set],
+        [conc]: value,
+      },
+    }))
+    setError(null)
+  }
+
+  const handlePlotGraph = () => {
+    for (const conc of CONCENTRATIONS) {
+      if (!inputs.A[conc] || !inputs.B[conc]) {
+        setError('กรุณากรอกระยะการเคลื่อนที่ให้ครบทุกช่องก่อนพล็อตกราฟ')
+        return
+      }
+    }
+    setHasPlotted(true)
     onComplete()
   }
 
   const handleReset = () => {
-    setGraphed(false)
+    setInputs({ A: {}, B: {} })
+    setHasPlotted(false)
+    setError(null)
     if (typeof window !== 'undefined') {
-      sessionStorage.removeItem('lab_graphed_state')
+      sessionStorage.removeItem('lab_measurement_inputs')
+      sessionStorage.removeItem('lab_measurement_plotted')
     }
   }
 
-  // คำนวณพิกัดสำหรับ SVG Graph ตามค่า distances ที่ส่งมา
-  const pointsA = distances.A.map((val, idx) => {
+  // คำนวณพิกัดสำหรับ SVG Graph จากข้อมูลที่ผู้ใช้กรอก
+  const pointsA = CONCENTRATIONS.map((conc, idx) => {
+    const val = Number(inputs.A[conc]) || 0
     const x = 40 + idx * 60
     const y = 220 - Math.min(val * 4, 180)
     return `${x},${y}`
   }).join(' ')
 
-  const pointsB = distances.B.map((val, idx) => {
+  const pointsB = CONCENTRATIONS.map((conc, idx) => {
+    const val = Number(inputs.B[conc]) || 0
     const x = 40 + idx * 60
     const y = 220 - Math.min(val * 4, 180)
     return `${x},${y}`
@@ -63,11 +96,11 @@ export function StepMeasurement({ distances, onComplete }: StepMeasurementProps)
       <StepHeading
         step={4}
         title="บันทึกผล & พล็อตกราฟ (Measurement & Graph)"
-        subtitle="บันทึกและแสดงผลระยะการเคลื่อนที่ (mm) จากการทดลองในขั้นตอนที่ 3 เพื่อสร้างกราฟความสัมพันธ์"
+        subtitle="กรอกระยะการเคลื่อนที่ (mm) ที่วัดได้จากขั้นตอนที่ 3 ลงในตาราง แล้วกด Plot Graph เพื่อสร้างกราฟความสัมพันธ์ระหว่างความเข้มข้นกับระยะทาง"
       />
 
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* ตารางแสดงผลการทดลองจากขั้นตอนที่ 3 */}
+        {/* ตารางบันทึกผลการทดลอง (แบบกรอกข้อมูลเอง) */}
         <Panel className="flex flex-col gap-4">
           <h3 className="text-sm font-semibold text-foreground">ตารางบันทึกผลการทดลอง</h3>
 
@@ -81,33 +114,79 @@ export function StepMeasurement({ distances, onComplete }: StepMeasurementProps)
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
-                {CONCENTRATIONS.map((conc, idx) => (
+                {CONCENTRATIONS.map((conc) => (
                   <tr key={conc}>
                     <td className="py-3 font-mono font-semibold text-foreground">{conc}</td>
-                    <td className="py-3 font-mono font-medium text-[#ff1a1a]">{distances.A[idx]} mm</td>
-                    <td className="py-3 font-mono font-medium text-[#f2c230]">{distances.B[idx]} mm</td>
+                    <td className="py-3 pr-2">
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={inputs.A[conc] ?? ''}
+                        onChange={(e) => handleInputChange('A', conc, e.target.value)}
+                        placeholder="ระบุตัวเลข"
+                        className="w-full rounded-lg border border-border bg-background px-3 py-1.5 font-mono text-sm text-foreground focus:border-primary focus:outline-none"
+                      />
+                    </td>
+                    <td className="py-3 pl-2">
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={inputs.B[conc] ?? ''}
+                        onChange={(e) => handleInputChange('B', conc, e.target.value)}
+                        placeholder="ระบุตัวเลข"
+                        className="w-full rounded-lg border border-border bg-background px-3 py-1.5 font-mono text-sm text-foreground focus:border-primary focus:outline-none"
+                      />
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
 
+          {error && <p className="text-xs font-medium text-destructive">{error}</p>}
+
           <div className="flex flex-wrap items-center gap-3 pt-2">
-            <Button onClick={handlePlot} className="gap-2 bg-amber-600 text-white hover:bg-amber-700">
+            <Button onClick={handlePlotGraph} className="gap-2 bg-amber-600 text-white hover:bg-amber-700">
               <TrendingUp className="size-4" /> Plot Graph
             </Button>
-            <Button variant="outline" onClick={handleReset} className="gap-2">
-              <RotateCcw className="size-4" /> ล้างกราฟ
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowStep3Ref(!showStep3Ref)}
+              className="gap-2"
+            >
+              {showStep3Ref ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+              {showStep3Ref ? 'ซ่อนผลขั้นตอนที่ 3' : 'ดูผลขั้นตอนที่ 3'}
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleReset} className="gap-2">
+              <RotateCcw className="size-4" /> ล้างตาราง
             </Button>
           </div>
+
+          {/* ส่วนดูผลอ้างอิงจากขั้นตอนที่ 3 */}
+          {showStep3Ref && (
+            <div className="mt-2 rounded-xl border border-border/60 bg-muted/30 p-4 text-xs">
+              <p className="mb-2 font-semibold text-foreground">💡 ข้อมูลอ้างอิงจากขั้นตอนที่ 3 (ระยะทางที่วัดได้):</p>
+              <div className="grid grid-cols-2 gap-4 font-mono">
+                <div>
+                  <span className="text-[#ff1a1a] font-semibold">Set A:</span>{' '}
+                  {CONCENTRATIONS.map((c, i) => `${c}M=${distances.A[i]}mm`).join(', ')}
+                </div>
+                <div>
+                  <span className="text-[#f2c230] font-semibold">Set B:</span>{' '}
+                  {CONCENTRATIONS.map((c, i) => `${c}M=${distances.B[i]}mm`).join(', ')}
+                </div>
+              </div>
+            </div>
+          )}
         </Panel>
 
-        {/* กราฟแสดงผล */}
+        {/* กราฟแสดงผลแบบ SVG */}
         <Panel className="flex flex-col gap-4">
           <h3 className="text-sm font-semibold text-foreground">กราฟความเข้มข้น vs ระยะทางการเคลื่อนที่</h3>
 
           <div className="flex h-80 w-full items-center justify-center rounded-xl border border-border bg-background/50 p-4">
-            {graphed ? (
+            {hasPlotted ? (
               <div className="relative h-full w-full">
                 <svg viewBox="0 0 320 250" className="h-full w-full overflow-visible">
                   {/* เส้น Grid */}
@@ -116,23 +195,25 @@ export function StepMeasurement({ distances, onComplete }: StepMeasurementProps)
 
                   {/* เส้นกราฟ Set A */}
                   <polyline fill="none" stroke="#ff1a1a" strokeWidth="2.5" points={pointsA} />
-                  {distances.A.map((val, idx) => {
+                  {CONCENTRATIONS.map((conc, idx) => {
+                    const val = Number(inputs.A[conc]) || 0
                     const x = 40 + idx * 60
                     const y = 220 - Math.min(val * 4, 180)
-                    return <circle key={`a-${idx}`} cx={x} cy={y} r="4" fill="#ff1a1a" />
+                    return <circle key={`a-${conc}`} cx={x} cy={y} r="4" fill="#ff1a1a" />
                   })}
 
                   {/* เส้นกราฟ Set B */}
                   <polyline fill="none" stroke="#f2c230" strokeWidth="2.5" points={pointsB} />
-                  {distances.B.map((val, idx) => {
+                  {CONCENTRATIONS.map((conc, idx) => {
+                    const val = Number(inputs.B[conc]) || 0
                     const x = 40 + idx * 60
                     const y = 220 - Math.min(val * 4, 180)
-                    return <circle key={`b-${idx}`} cx={x} cy={y} r="4" fill="#f2c230" />
+                    return <circle key={`b-${conc}`} cx={x} cy={y} r="4" fill="#f2c230" />
                   })}
 
                   {/* แกน X Label */}
                   {CONCENTRATIONS.map((conc, idx) => (
-                    <text key={`x-${idx}`} x={40 + idx * 60} y="240" fill="#94a3b8" fontSize="10" textAnchor="middle">
+                    <text key={`x-${conc}`} x={40 + idx * 60} y="240" fill="#94a3b8" fontSize="10" textAnchor="middle">
                       {conc}M
                     </text>
                   ))}
@@ -153,12 +234,12 @@ export function StepMeasurement({ distances, onComplete }: StepMeasurementProps)
             ) : (
               <div className="flex flex-col items-center justify-center text-center text-muted-foreground">
                 <TrendingUp className="mb-2 size-10 opacity-40" />
-                <p className="text-sm">กด Plot Graph เพื่อแสดงกราฟความสัมพันธ์</p>
+                <p className="text-sm">กรอกข้อมูลให้ครบและถูกต้อง แล้วกด Plot Graph เพื่อแสดงกราฟ</p>
               </div>
             )}
           </div>
 
-          {graphed && (
+          {hasPlotted && (
             <Notice tone="success" className="flex items-center gap-2">
               <CheckCircle2 className="size-5 text-green-500" />
               <span>พล็อตกราฟสำเร็จ! คุณสามารถไปทำภารกิจพิเศษสารในครัวเรือนต่อได้เลย</span>
