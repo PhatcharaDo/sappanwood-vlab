@@ -8,45 +8,45 @@ import { cn } from '@/lib/utils'
 import { mixHex } from '@/lib/lab'
 
 const HOUSEHOLD_SAMPLES = [
-{
+  {
     id: 'vinegar',
     name: 'น้ำส้มสายชู (Vinegar)',
     type: 'กรดอ่อน',
     baseSetId: 'A',
-    basePaperColor: '#ff1a1a',
-    finalColor: '#f6b319', 
-    distance: 15
+    basePaperColor: '#ff1a1a', // สีแดงสดชัดเจน
+    finalColor: '#f6b319',
+    distance: 15,
     chemDesc: 'มีกรดแอซีติก (Acetic acid) เป็นองค์ประกอบ มีฤทธิ์เป็นกรดอ่อน ทำปฏิกิริยากับเบสที่เคลือบไว้บนกระดาษ ทำให้กระดาษสีแดงเปลี่ยนเป็นสีเหลือง'
   },
-{
+  {
     id: 'lime',
     name: 'น้ำมะนาว (Lime juice)',
     type: 'กรดอ่อน',
     baseSetId: 'A',
-    basePaperColor: '#ff1a1a',
+    basePaperColor: '#ff1a1a', // สีแดงสดชัดเจน
     finalColor: '#f59e0b',
     distance: 18,
     chemDesc: 'มีกรดซิตริก (Citric acid) มีฤทธิ์เป็นกรด ทำปฏิกิริยาสะเทินกับเบสบนกระดาษ ทำให้กระดาษสีแดงเปลี่ยนเป็นสีเหลือง-ส้ม'
   },
-{
+  {
     id: 'baking-soda',
     name: 'เบกกิ้งโซดา (Baking soda)',
     type: 'เบสอ่อน',
     baseSetId: 'B',
     basePaperColor: '#f2c230',
-    finalColor: '#e60000',
+    finalColor: '#e60000', // สีม่วงแดงสดที่เข้มและชัดขึ้น
     distance: 28,
-    chemDesc: 'มีฤทธิ์เป็นเบสอ่อน ทำปฏิกิริยากับกรดที่เคลือบไว้บนกระดาษ ทำให้กระดาษสีเหลืองเปลี่ยนเป็นสีแดง'
+    chemDesc: 'มีฤทธิ์เป็นเบสอ่อน ทำปฏิกิริยากับกรดที่เคลือบไว้บนกระดาษ ทำให้กระดาษสีเหลืองเปลี่ยนเป็นสีแดงสดอย่างชัดเจน'
   },
-{
+  {
     id: 'soapy-water',
     name: 'น้ำสบู่ (Soapy water)',
     type: 'เบสอ่อน',
     baseSetId: 'B',
     basePaperColor: '#f2c230',
-    finalColor: '#e60000',
+    finalColor: '#e60000', // สีม่วงแดงสดที่เข้มและชัดขึ้น
     distance: 22,
-    chemDesc: 'มีฤทธิ์เป็นเบส ทำปฏิกิริยากับกรดที่เคลือบไว้บนกระดาษ ทำให้กระดาษสีเหลืองเปลี่ยนเป็นสีแดง'
+    chemDesc: 'มีฤทธิ์เป็นเบส ทำปฏิกิริยากับกรดที่เคลือบไว้บนกระดาษ ทำให้กระดาษสีเหลืองเปลี่ยนเป็นสีแดงสดอย่างชัดเจน'
   },
 ]
 
@@ -105,7 +105,7 @@ export function StepHousehold({ onBack }: Props) {
 
           <div className="relative flex h-80 w-64 items-end justify-center rounded-2xl border border-border bg-[#0d1f38] p-6 shadow-inner">
             <div
-              className="relative aspect-[3/4] w-48 rounded-md shadow-lg"
+              className="relative aspect-[3/4] w-48 rounded-md shadow-lg transition-colors duration-500"
               style={{ backgroundColor: selectedSample.basePaperColor }}
             >
               <div className="absolute bottom-1 left-1/2 size-3 -translate-x-1/2 rounded-full border border-white/40 bg-white/10" />
