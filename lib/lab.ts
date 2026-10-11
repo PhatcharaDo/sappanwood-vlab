@@ -6,7 +6,7 @@ export const CONCENTRATIONS = [0.1, 0.2, 0.3, 0.4, 0.5] as const
 
 export const STRIP_LENGTH_MM = 60
 export const PX_PER_MM = 4
-export const TOLERANCE_MM = 3
+export const TOLERANCE_MM = 1
 
 /** Simulated migration distances (mm) for each concentration, 0.1 M to 0.5 M. */
 export const EXPECTED_DISTANCE: Record<SetId, number[]> = {
