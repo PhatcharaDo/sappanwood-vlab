@@ -33,16 +33,26 @@ export function StepMeasurement({ distances, onComplete }: StepMeasurementProps)
     return false
   })
 
-  const [showStep3Ref, setShowStep3Ref] = useState(false)
+  const [showStep3Ref, setShowStep3Ref] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('lab_measurement_show_ref')
+      if (saved) {
+        try { return JSON.parse(saved) } catch (e) { /* ignore */ }
+      }
+    }
+    return false
+  })
+
   const [error, setError] = useState<string | null>(null)
 
-  // บันทึกลง sessionStorage อัตโนมัติทุกครั้งที่มีการกรอกข้อมูลหรือพล็อตกราฟ
+  // บันทึกลง sessionStorage อัตโนมัติทุกครั้งที่มีการเปลี่ยนแปลง
   useEffect(() => {
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('lab_measurement_inputs', JSON.stringify(inputs))
       sessionStorage.setItem('lab_measurement_plotted', JSON.stringify(hasPlotted))
+      sessionStorage.setItem('lab_measurement_show_ref', JSON.stringify(showStep3Ref))
     }
-  }, [inputs, hasPlotted])
+  }, [inputs, hasPlotted, showStep3Ref])
 
   const handleInputChange = (set: SetId, conc: number, value: string) => {
     setInputs((prev) => ({
@@ -73,6 +83,7 @@ export function StepMeasurement({ distances, onComplete }: StepMeasurementProps)
     if (typeof window !== 'undefined') {
       sessionStorage.removeItem('lab_measurement_inputs')
       sessionStorage.removeItem('lab_measurement_plotted')
+      sessionStorage.removeItem('lab_measurement_show_ref')
     }
   }
 
@@ -100,7 +111,7 @@ export function StepMeasurement({ distances, onComplete }: StepMeasurementProps)
       />
 
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* ตารางบันทึกผลการทดลอง (แบบกรอกข้อมูลเอง) */}
+        {/* ตารางบันทึกผลการทดลอง (แบบกรอกเอง) */}
         <Panel className="flex flex-col gap-4">
           <h3 className="text-sm font-semibold text-foreground">ตารางบันทึกผลการทดลอง</h3>
 
@@ -167,7 +178,7 @@ export function StepMeasurement({ distances, onComplete }: StepMeasurementProps)
           {showStep3Ref && (
             <div className="mt-2 rounded-xl border border-border/60 bg-muted/30 p-4 text-xs">
               <p className="mb-2 font-semibold text-foreground">💡 ข้อมูลอ้างอิงจากขั้นตอนที่ 3 (ระยะทางที่วัดได้):</p>
-              <div className="grid grid-cols-2 gap-4 font-mono">
+              <div className="grid grid-cols-1 gap-2 font-mono sm:grid-cols-2">
                 <div>
                   <span className="text-[#ff1a1a] font-semibold">Set A:</span>{' '}
                   {CONCENTRATIONS.map((c, i) => `${c}M=${distances.A[i]}mm`).join(', ')}
