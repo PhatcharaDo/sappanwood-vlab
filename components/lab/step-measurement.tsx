@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { CONCENTRATIONS, type SetId } from '@/lib/lab'
 import { Notice, Panel, StepHeading } from './lab-ui'
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import { CheckCircle2, RotateCcw, TrendingUp } from 'lucide-react'
 
 type StepMeasurementProps = {
@@ -13,12 +12,16 @@ type StepMeasurementProps = {
 }
 
 export function StepMeasurement({ distances, onComplete }: StepMeasurementProps) {
-  // โหลดข้อมูลตารางและสถานะกราฟจาก sessionStorage ถ้ามี
+  // โหลดข้อมูลตารางและสถานะกราฟจาก sessionStorage
   const [inputs, setInputs] = useState<Record<SetId, Record<number, string>>>(() => {
     if (typeof window !== 'undefined') {
       const saved = sessionStorage.getItem('lab_measurement_inputs')
       if (saved) {
-        try { return JSON.parse(saved) } catch (e) { /* ignore */ }
+        try {
+          return JSON.parse(saved)
+        } catch (e) {
+          /* ignore */
+        }
       }
     }
     return { A: {}, B: {} }
@@ -28,7 +31,11 @@ export function StepMeasurement({ distances, onComplete }: StepMeasurementProps)
     if (typeof window !== 'undefined') {
       const saved = sessionStorage.getItem('lab_measurement_plotted')
       if (saved) {
-        try { return JSON.parse(saved) } catch (e) { /* ignore */ }
+        try {
+          return JSON.parse(saved)
+        } catch (e) {
+          /* ignore */
+        }
       }
     }
     return false
@@ -56,7 +63,6 @@ export function StepMeasurement({ distances, onComplete }: StepMeasurementProps)
   }
 
   const handlePlotGraph = () => {
-    // ตรวจสอบว่ากรอกครบทุกช่องหรือไม่
     for (const conc of CONCENTRATIONS) {
       if (!inputs.A[conc] || !inputs.B[conc]) {
         setError('กรุณากรอกระยะการเคลื่อนที่ให้ครบทุกช่องก่อนพล็อตกราฟ')
@@ -77,12 +83,20 @@ export function StepMeasurement({ distances, onComplete }: StepMeasurementProps)
     }
   }
 
-  // เตรียมข้อมูลสำหรับ Recharts
-  const chartData = CONCENTRATIONS.map((conc) => ({
-    concentration: conc,
-    setA: Number(inputs.A[conc]) || 0,
-    setB: Number(inputs.B[conc]) || 0,
-  }))
+  // คำนวณพิกัดสำหรับ SVG Graph
+  const pointsA = CONCENTRATIONS.map((conc, idx) => {
+    const val = Number(inputs.A[conc]) || 0
+    const x = 40 + idx * 60
+    const y = 220 - Math.min(val * 4, 180)
+    return `${x},${y}`
+  }).join(' ')
+
+  const pointsB = CONCENTRATIONS.map((conc, idx) => {
+    const val = Number(inputs.B[conc]) || 0
+    const x = 40 + idx * 60
+    const y = 220 - Math.min(val * 4, 180)
+    return `${x},${y}`
+  }).join(' ')
 
   return (
     <div className="flex flex-col gap-6">
@@ -96,7 +110,7 @@ export function StepMeasurement({ distances, onComplete }: StepMeasurementProps)
         {/* ตารางบันทึกผลการทดลอง */}
         <Panel className="flex flex-col gap-4">
           <h3 className="text-sm font-semibold text-foreground">ตารางบันทึกผลการทดลอง</h3>
-          
+
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
@@ -148,38 +162,55 @@ export function StepMeasurement({ distances, onComplete }: StepMeasurementProps)
           </div>
         </Panel>
 
-        {/* กราฟแสดงผล */}
+        {/* กราฟแสดงผลแบบ SVG */}
         <Panel className="flex flex-col gap-4">
           <h3 className="text-sm font-semibold text-foreground">กราฟความเข้มข้น vs ระยะทางการเคลื่อนที่</h3>
-          
+
           <div className="flex h-80 w-full items-center justify-center rounded-xl border border-border bg-background/50 p-4">
             {hasPlotted ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                  <XAxis dataKey="concentration" stroke="#94a3b8" fontSize={12} label={{ value: 'Concentration (M)', position: 'insideBottom', offset: -5, fill: '#94a3b8', fontSize: 11 }} />
-                  <YAxis stroke="#94a3b8" fontSize={12} label={{ value: 'Distance (mm)', angle: -90, position: 'insideLeft', fill: '#94a3b8', fontSize: 11 }} />
-                  <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', color: '#f8fafc', fontSize: '12px' }} />
-                  <Line type="monotone" dataKey="setA" name="Set A (กระดาษแดง)" stroke="#ff1a1a" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
-                  <Line type="monotone" dataKey="setB" name="Set B (กระดาษเหลือง)" stroke="#f2c230" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex flex-col items-center justify-center text-center text-muted-foreground">
-                <TrendingUp className="mb-2 size-10 opacity-40" />
-                <p className="text-sm">กรอกข้อมูลให้ครบและถูกต้อง แล้วกด Plot Graph เพื่อแสดงกราฟ</p>
-              </div>
-            )}
-          </div>
+              <div className="relative h-full w-full">
+                <svg viewBox="0 0 320 250" className="h-full w-full overflow-visible">
+                  {/* เส้น Grid */}
+                  <line x1="30" y1="220" x2="300" y2="220" stroke="#334155" strokeWidth="1" />
+                  <line x1="30" y1="30" x2="30" y2="220" stroke="#334155" strokeWidth="1" />
 
-          {hasPlotted && (
-            <Notice tone="success" className="flex items-center gap-2">
-              <CheckCircle2 className="size-5 text-green-500" />
-              <span>พล็อตกราฟสำเร็จ! คุณสามารถไปทำภารกิจพิเศษสารในครัวเรือนต่อได้เลย</span>
-            </Notice>
-          )}
-        </Panel>
-      </div>
-    </div>
-  )
-}
+                  {/* เส้นกราฟ Set A */}
+                  <polyline fill="none" stroke="#ff1a1a" strokeWidth="2.5" points={pointsA} />
+                  {CONCENTRATIONS.map((conc, idx) => {
+                    const val = Number(inputs.A[conc]) || 0
+                    const x = 40 + idx * 60
+                    const y = 220 - Math.min(val * 4, 180)
+                    return <circle key={`a-${conc}`} cx={x} cy={y} r="4" fill="#ff1a1a" />
+                  })}
+
+                  {/* เส้นกราฟ Set B */}
+                  <polyline fill="none" stroke="#f2c230" strokeWidth="2.5" points={pointsB} />
+                  {CONCENTRATIONS.map((conc, idx) => {
+                    const val = Number(inputs.B[conc]) || 0
+                    const x = 40 + idx * 60
+                    const y = 220 - Math.min(val * 4, 180)
+                    return <circle key={`b-${conc}`} cx={x} cy={y} r="4" fill="#f2c230" />
+                  })}
+
+                  {/* แกน X Label */}
+                  {CONCENTRATIONS.map((conc, idx) => (
+                    <text key={`x-${conc}`} x={40 + idx * 60} y="240" fill="#94a3b8" fontSize="10" textAnchor="middle">
+                      {conc}M
+                    </text>
+                  ))}
+                </svg>
+
+                {/* Legend */}
+                <div className="absolute right-2 top-2 flex items-center gap-4 rounded-lg bg-card/80 p-2 text-xs border border-border">
+                  <div className="flex items-center gap-1.5">
+                    <div className="size-2.5 rounded-full bg-[#ff1a1a]" />
+                    <span className="text-muted-foreground">Set A</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="size-2.5 rounded-full bg-[#f2c230]" />
+                    <span className="text-muted-foreground">Set B</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex
