@@ -35,7 +35,7 @@ export function VirtualLab() {
   const [graphed, setGraphed] = useState(false)
   const [showHousehold, setShowHousehold] = useState(false)
   
-  // โหลดสถานะการทดสอบสารครัวเรือนจาก localStorage เพื่อให้จำค่าถาวรไม่รีเซ็ต
+  // โหลดและบันทึกสถานะการทดสอบสารครัวเรือนผ่าน localStorage เพื่อไม่ให้รีเซ็ตเมื่อเข้า-ออก
   const [householdTestedMap, setHouseholdTestedMap] = useState<Record<string, boolean>>(() => {
     if (typeof window !== 'undefined') {
       try {
@@ -48,7 +48,6 @@ export function VirtualLab() {
     return {}
   })
 
-  // บันทึกลง localStorage ทุกครั้งที่มีการเปลี่ยนแปลง
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
@@ -76,12 +75,12 @@ export function VirtualLab() {
         graphed,
       ]
 
-  // เช็คว่าทดสอบครบทั้ง 4 ตัวอย่างแล้วหรือยัง
+  // เช็คเงื่อนไขความสำเร็จแบบรัดกุม: ต้องทดสอบครบทั้ง 4 ตัวอย่างจริง ๆ เท่านั้น
   const isHouseholdFullyCompleted = 
-    householdTestedMap['vinegar'] &&
-    householdTestedMap['lime'] &&
-    householdTestedMap['baking-soda'] &&
-    householdTestedMap['soapy-water']
+    Boolean(householdTestedMap['vinegar']) &&
+    Boolean(householdTestedMap['lime']) &&
+    Boolean(householdTestedMap['baking-soda']) &&
+    Boolean(householdTestedMap['soapy-water'])
 
   function goTo(step: number) {
     setShowHousehold(false)
@@ -258,7 +257,7 @@ export function VirtualLab() {
                   ไปสู่การทดลองพิเศษ: สารในครัวเรือน (Household Testing)
                 </Button>
 
-                {/* ปุ่มจบหลักสูตรจะแสดงเฉพาะเมื่อทดสอบสารในครัวเรือนครบทั้ง 4 ชนิดจริงๆ แล้วเท่านั้น */}
+                {/* แสดงปุ่มจบหลักสูตรเฉพาะเมื่อทำในครัวครบทั้ง 4 ตัวแล้วจริงๆ เท่านั้น */}
                 {(isHouseholdFullyCompleted || isBypassed) && (
                   <Button size="lg" variant="default" className="gap-2 bg-green-600 text-white hover:bg-green-700 shadow-lg animate-bounce" onClick={() => setShowCompletion(true)}>
                     <Award className="size-5" />
