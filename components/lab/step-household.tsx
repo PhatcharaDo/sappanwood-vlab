@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowLeft, Beaker, CheckCircle2, Trophy, XCircle } from 'lucide-react'
+import { Beaker, CheckCircle2, Trophy, XCircle } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Notice, Panel, StepHeading } from './lab-ui'
@@ -63,7 +63,6 @@ export function StepHousehold({ onBack }: Props) {
 
   const handleSelectSample = (sample: typeof samples[0]) => {
     setSelectedSample(sample)
-    // ถ้าสารที่เลือกเคยทดสอบแล้ว ให้ล็อคชุดไว้ที่ correctSet ทันที ถ้ายังไม่เคยให้ล้างตัวเลือก
     if (testedSamples[sample.id]) {
       setChosenSet(sample.correctSet as 'A' | 'B')
     } else {
@@ -76,7 +75,6 @@ export function StepHousehold({ onBack }: Props) {
   }
 
   const isTested = !!testedSamples[selectedSample.id]
-  // หากทดสอบแล้ว ให้ถือว่าเลือกถูกเสมอ (เพราะผ่านการกรองจนกดทดสอบ)
   const activeChosenSet = isTested ? selectedSample.correctSet : chosenSet
   const isCorrect = activeChosenSet === selectedSample.correctSet
   const allCompleted = samples.every((s) => testedSamples[s.id])
@@ -221,30 +219,4 @@ export function StepHousehold({ onBack }: Props) {
                 </div>
               </div>
               <span className="font-mono text-[11px] text-muted-foreground">
-                {isTested && activeChosenSet === 'A' ? `${selectedSample.distance} mm` : 'รอดำเนินการ'}
-              </span>
-            </div>
-
-            {/* ชุด B */}
-            <div className={cn('flex flex-col items-center gap-2 rounded-2xl border p-4 transition-all', activeChosenSet === 'B' ? 'border-primary bg-card shadow-lg' : 'border-border/50 bg-card/40 opacity-60')}>
-              <span className="text-xs font-medium text-muted-foreground">ชุด B (กระดาษเหลือง)</span>
-              <div className="relative flex h-64 w-32 items-end justify-center rounded-xl border border-border bg-[#0d1f38] p-4 shadow-inner">
-                <div
-                  className="relative aspect-[3/4] w-24 rounded-md shadow-lg"
-                  style={{ backgroundColor: setBInfo.paperColor }}
-                >
-                  <div className="absolute bottom-1 left-1/2 size-2.5 -translate-x-1/2 rounded-full border border-white/40 bg-white/10" />
-                  {isTested && activeChosenSet === 'B' && (
-                    <div
-                      className="absolute inset-x-0 bottom-0 animate-migrate"
-                      style={{
-                        height: `${selectedSample.distance * 3}px`,
-                        background: `linear-gradient(to top, ${setBInfo.reactedColor} 0%, ${setBInfo.reactedColor} 88%, ${mixHex(setBInfo.reactedColor, setBInfo.paperColor, 0.5)} 100%)`,
-                        borderRadius: '2px 2px 0 0'
-                      }}
-                    />
-                  )}
-                </div>
-              </div>
-              <span className="font-mono text-[11px] text-muted-foreground">
-                {isTested && activeChosenSet === 'B'
+                {isTested && activeChosenSet === 'A
