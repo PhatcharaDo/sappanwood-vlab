@@ -36,7 +36,7 @@ export function StepHousehold({ testedMap, setTestedMap, onCompleteCourse, onBac
   const isTested = Boolean(testedMap[selected.id])
   const activeSet = isTested ? selected.correctSet : chosenSet
   const isCorrect = activeSet === selected.correctSet
-  const allDone = samples.every((s) => Boolean(testedMap[s.id]))
+  const allDone = ITEMS.every((s) => testedMap[s.id] === true)
 
   const handleTestClick = () => {
     const updated = { ...testedMap, [selected.id]: true }
