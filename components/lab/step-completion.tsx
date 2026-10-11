@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { Award, FileText, Mail, Phone, User, ArrowLeft, CheckCircle2 } from 'lucide-react'
+import { Award, FileText, Mail, Phone, User, ArrowLeft, CheckCircle2, RotateCcw } from 'lucide-react'
 
 type StepCompletionProps = {
   onBack: () => void
@@ -15,7 +15,6 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
   })
   const [isSubmitted, setIsSubmitted] = useState(false)
 
-  // ตรวจสอบและดึงข้อมูลที่เคยบันทึกไว้ใน localStorage เพื่อล็อคสถานะไว้ตลอด
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
@@ -47,6 +46,15 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
     }
   }
 
+  // ฟังก์ชันสำหรับเคลียร์ค่าเพื่อเริ่มกรอกใหม่ตามที่คุณต้องการ
+  const handleReset = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('lab_certificate_data')
+    }
+    setFormData({ name: '', school: '' })
+    setIsSubmitted(false)
+  }
+
   return (
     <div className="flex min-h-dvh flex-col">
       <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-4 py-8 md:px-6">
@@ -57,7 +65,7 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
           <h1 className="text-xl font-bold text-foreground">🎉 หน้าสรุปผลและจบหลักสูตร Virtual Lab</h1>
         </div>
 
-        {/* ฟอร์มกรอกข้อมูล / เกียรติบัตร (หากยังไม่เคยส่งจะแสดงฟอร์ม หากส่งแล้วจะล็อคแสดงเกียรติบัตรยาวๆ) */}
+        {/* ฟอร์มกรอกข้อมูล / เกียรติบัตร */}
         {!isSubmitted ? (
           <section className="rounded-2xl border border-border bg-card p-6 shadow-md">
             <div className="mb-4 flex items-center gap-3">
@@ -65,7 +73,7 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
               <h3 className="text-lg font-semibold text-foreground">กรอกข้อมูลเพื่อรับเกียรติบัตรผ่านการอบรม</h3>
             </div>
             <p className="mb-6 text-sm text-muted-foreground">
-              กรุณากรอกชื่อ-นามสกุล และชื่อสถานศึกษาของท่านให้ถูกต้อง เพื่อแสดงลงบนเกียรติบัตร (เมื่อยืนยันแล้วข้อมูลจะถูกล็อคไว้ถาวร)
+              กรุณากรอกชื่อ-นามสกุล และชื่อสถานศึกษาของท่านให้ถูกต้อง เพื่อแสดงลงบนเกียรติบัตร (เมื่อยืนยันแล้วข้อมูลจะถูกล็อคไว้)
             </p>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -122,6 +130,13 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
             <div className="my-6 inline-block rounded-xl border border-amber-500/30 bg-amber-500/5 px-6 py-3">
               <p className="text-xs font-semibold text-amber-600 dark:text-amber-400">สถาบัน / โครงการพัฒนา:</p>
               <p className="text-sm font-bold text-foreground">{formData.school}</p>
+            </div>
+
+            {/* ปุ่มสำหรับปลดล็อค / เริ่มใหม่เมื่อต้องการ */}
+            <div className="mt-6 pt-4 border-t border-border/40">
+              <Button variant="outline" size="sm" onClick={handleReset} className="gap-2 text-muted-foreground hover:text-foreground">
+                <RotateCcw className="size-3.5" /> ล้างข้อมูล / เปลี่ยนชื่อผู้รับเกียรติบัตร
+              </Button>
             </div>
           </section>
         )}
