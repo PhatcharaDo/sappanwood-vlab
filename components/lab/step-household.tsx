@@ -54,7 +54,7 @@ export function StepHousehold({ testedMap, setTestedMap, onBack }: Props) {
               <p className="text-xs text-muted-foreground">เข้าใจหลักการทำงานของกระดาษ µPADs สกัดแก่นฝางและการประยุกต์ใช้จริง</p>
             </div>
           </div>
-          {/* แสดงเฉพาะปุ่มกลับหน้าหลักแล็บเท่านั้น */}
+          {/* แสดงปุ่มกลับหน้าหลักแล็บเพียงปุ่มเดียว */}
           <Button onClick={onBack} className="bg-green-600 text-white hover:bg-green-700">
             กลับสู่หน้าหลัก Virtual Lab
           </Button>
