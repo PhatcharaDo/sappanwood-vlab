@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { FlaskConical, Leaf, Shield, X, CheckCircle2 } from 'lucide-react'
+import { FlaskConical, Leaf, X, CheckCircle2 } from 'lucide-react'
 
 export function SiteHeader() {
   const [activeModal, setActiveModal] = useState<'green' | 'micro' | null>(null)
@@ -14,9 +14,13 @@ export function SiteHeader() {
             <div
               role="img"
               aria-label="ตราสัญลักษณ์โรงเรียน"
-              className="flex size-14 shrink-0 items-center justify-center rounded-full border-2 border-primary bg-background shadow-[0_0_4px_rgba(250,204,21,0.3)]"
+              className="flex size-14 shrink-0 items-center justify-center rounded-full border-2 border-primary bg-background shadow-[0_0_4px_rgba(250,204,21,0.3)] overflow-hidden p-1.5"
             >
-              <Shield className="size-7 text-primary" aria-hidden="true" />
+              <img
+                src="/school-logo.png"
+                alt="ตราโรงเรียนหาดใหญ่วิทยาลัยสมบูรณ์กุลกัญญา"
+                className="h-full w-full object-contain"
+              />
             </div>
             <div className="min-w-0">
               <p className="text-pretty text-sm font-semibold leading-snug text-primary md:text-base">
