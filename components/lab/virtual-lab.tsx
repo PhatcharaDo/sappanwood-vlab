@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { CONCENTRATIONS, type SetId } from '@/lib/lab'
 import { cn } from '@/lib/utils'
 import { SiteFooter } from './site-footer'
@@ -35,7 +35,30 @@ export function VirtualLab() {
   const [graphed, setGraphed] = useState(false)
   const [showHousehold, setShowHousehold] = useState(false)
   
-  const [householdTestedMap, setHouseholdTestedMap] = useState<Record<string, boolean>>({})
+  // โหลดสถานะการทดสอบสารครัวเรือนจาก localStorage เพื่อให้จำค่าถาวรไม่รีเซ็ต
+  const [householdTestedMap, setHouseholdTestedMap] = useState<Record<string, boolean>>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('household_tested_map')
+        return saved ? JSON.parse(saved) : {}
+      } catch {
+        return {}
+      }
+    }
+    return {}
+  })
+
+  // บันทึกลง localStorage ทุกครั้งที่มีการเปลี่ยนแปลง
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('household_tested_map', JSON.stringify(householdTestedMap))
+      } catch (e) {
+        console.error(e)
+      }
+    }
+  }, [householdTestedMap])
+
   const [showCompletion, setShowCompletion] = useState(false)
   const [isBypassed, setIsBypassed] = useState(false)
 
@@ -53,7 +76,7 @@ export function VirtualLab() {
         graphed,
       ]
 
-  // ตรวจสอบว่าทดสอบสารในครัวเรือนครบทั้ง 4 ชนิดจริงๆ แล้วหรือไม่
+  // เช็คว่าทดสอบครบทั้ง 4 ตัวอย่างแล้วหรือยัง
   const isHouseholdFullyCompleted = 
     householdTestedMap['vinegar'] &&
     householdTestedMap['lime'] &&
@@ -75,7 +98,6 @@ export function VirtualLab() {
       setGraphed(true)
       setHouseholdTestedMap({ vinegar: true, lime: true, 'baking-soda': true, 'soapy-water': true })
     } else {
-      // เมื่อปิด Bypass ให้รีเซ็ตค่ากลับมาเริ่มต้น
       setHouseholdTestedMap({})
     }
     setIsBypassed((prev) => !prev)
@@ -236,8 +258,8 @@ export function VirtualLab() {
                   ไปสู่การทดลองพิเศษ: สารในครัวเรือน (Household Testing)
                 </Button>
 
-                {/* แสดงปุ่มเฉพาะเมื่อทดสอบสารในครัวเรือนครบทั้ง 4 ชนิดจริงๆ เท่านั้น */}
-                {isHouseholdFullyCompleted && (
+                {/* ปุ่มจบหลักสูตรจะแสดงเฉพาะเมื่อทดสอบสารในครัวเรือนครบทั้ง 4 ชนิดจริงๆ แล้วเท่านั้น */}
+                {(isHouseholdFullyCompleted || isBypassed) && (
                   <Button size="lg" variant="default" className="gap-2 bg-green-600 text-white hover:bg-green-700 shadow-lg animate-bounce" onClick={() => setShowCompletion(true)}>
                     <Award className="size-5" />
                     🎓 จบหลักสูตร / ดูใบประกาศนียบัตร & ใบงาน
