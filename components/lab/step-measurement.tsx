@@ -213,4 +213,21 @@ export function StepMeasurement({ distances, onComplete }: StepMeasurementProps)
                 </div>
               </div>
             ) : (
-              <div className="flex flex
+              <div className="flex flex-col items-center justify-center text-center text-muted-foreground">
+                <TrendingUp className="mb-2 size-10 opacity-40" />
+                <p className="text-sm">กรอกข้อมูลให้ครบและถูกต้อง แล้วกด Plot Graph เพื่อแสดงกราฟ</p>
+              </div>
+            )}
+          </div>
+
+          {hasPlotted && (
+            <Notice tone="success" className="flex items-center gap-2">
+              <CheckCircle2 className="size-5 text-green-500" />
+              <span>พล็อตกราฟสำเร็จ! คุณสามารถไปทำภารกิจพิเศษสารในครัวเรือนต่อได้เลย</span>
+            </Notice>
+          )}
+        </Panel>
+      </div>
+    </div>
+  )
+}
