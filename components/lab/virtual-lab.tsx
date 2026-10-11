@@ -10,14 +10,17 @@ import { StepExtraction } from './step-extraction'
 import { StepMeasurement } from './step-measurement'
 import { StepNav } from './step-nav'
 import { StepTesting } from './step-testing'
+import { StepHousehold } from './step-household'
+import { Button } from '@/components/ui/button'
+import { Beaker } from 'lucide-react'
 
 // ฟังก์ชันสร้างค่าสุ่มระยะทางกลาง (เรียงลำดับจากน้อยไปมากตามความเข้มข้น)
 function generateRandomDistances() {
   const distances: number[] = []
-  let current = Math.floor(Math.random() * 6) + 12 // เริ่มต้นประมาณ 12-17 mm
+  let current = Math.floor(Math.random() * 6) + 12
   for (let i = 0; i < CONCENTRATIONS.length; i++) {
     distances.push(current)
-    current += Math.floor(Math.random() * 5) + 8 // เว้นระยะ 8-12 mm
+    current += Math.floor(Math.random() * 5) + 8
   }
   return distances
 }
@@ -31,8 +34,8 @@ export function VirtualLab() {
     B: Array(5).fill(false),
   })
   const [graphed, setGraphed] = useState(false)
+  const [showHousehold, setShowHousehold] = useState(false)
 
-  // เก็บค่าระยะทางสุ่มกลางสำหรับ Set A และ Set B
   const [randomDistances] = useState<Record<SetId, number[]>>({
     A: generateRandomDistances(),
     B: generateRandomDistances(),
@@ -46,8 +49,21 @@ export function VirtualLab() {
   ]
 
   function goTo(step: number) {
+    setShowHousehold(false)
     setActive(step)
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  if (showHousehold) {
+    return (
+      <div className="flex min-h-dvh flex-col">
+        <SiteHeader />
+        <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-6 md:px-6 md:py-8">
+          <StepHousehold onBack={() => setShowHousehold(false)} />
+        </main>
+        <SiteFooter />
+      </div>
+    )
   }
 
   return (
@@ -82,7 +98,18 @@ export function VirtualLab() {
         )}
         {completed[2] && (
           <section className={cn(active !== 4 && 'hidden')} aria-label="ขั้นตอนที่ 4">
-            <StepMeasurement distances={randomDistances} onComplete={() => setGraphed(true)} />
+            <StepMeasurement
+              distances={randomDistances}
+              onComplete={() => setGraphed(true)}
+            />
+            {graphed && (
+              <div className="mt-6 flex justify-center">
+                <Button size="lg" className="gap-2 bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-lg hover:from-orange-700 hover:to-amber-700" onClick={() => setShowHousehold(true)}>
+                  <Beaker className="size-5" />
+                  ไปสู่การทดลองพิเศษ: สารในครัวเรือน (Household Testing)
+                </Button>
+              </div>
+            )}
           </section>
         )}
       </main>
