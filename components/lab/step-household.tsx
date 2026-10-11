@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowLeft, Beaker, CheckCircle2, AlertCircle } from 'lucide-react'
+import { ArrowLeft, Beaker, CheckCircle2, XCircle } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Notice, Panel, StepHeading } from './lab-ui'
@@ -12,29 +12,33 @@ const HOUSEHOLD_SAMPLES = [
     id: 'vinegar',
     name: 'น้ำส้มสายชู (Vinegar)',
     type: 'กรดอ่อน',
-    correctSet: 'A', // ต้องใช้ชุด A (กระดาษสีแดงเคลือบเบส)
-    chemDesc: 'น้ำส้มสายชูมีฤทธิ์เป็นกรดอ่อน เหมาะกับการทดสอบด้วยชุด A (กระดาษสีแดงเคลือบเบส) โดยจะทำปฏิกิริยาเปลี่ยนจากสีแดงเป็นสีเหลือง'
+    correctSet: 'A',
+    correctDesc: 'ถูกต้อง! น้ำส้มสายชูมีฤทธิ์เป็นกรด ต้องใช้ชุด A (กระดาษสีแดงเคลือบเบส) ซึ่งจะเปลี่ยนเป็นสีเหลืองเมื่อทำปฏิกิริยา',
+    distance: 15,
   },
   {
     id: 'lime',
     name: 'น้ำมะนาว (Lime juice)',
     type: 'กรดอ่อน',
-    correctSet: 'A', // ต้องใช้ชุด A
-    chemDesc: 'น้ำมะนาวมีกรดซิตริก (กรดอ่อน) เหมาะกับการทดสอบด้วยชุด A (กระดาษสีแดงเคลือบเบส) โดยจะเปลี่ยนสีเป็นสีเหลือง-ส้ม'
+    correctSet: 'A',
+    correctDesc: 'ถูกต้อง! น้ำมะนาวมีฤทธิ์เป็นกรด เหมาะกับการใช้ชุด A (กระดาษสีแดงเคลือบเบส) เพื่อสังเกตการเปลี่ยนเป็นสีเหลือง-ส้ม',
+    distance: 18,
   },
   {
     id: 'baking-soda',
     name: 'เบกกิ้งโซดา (Baking soda)',
     type: 'เบสอ่อน',
-    correctSet: 'B', // ต้องใช้ชุด B (กระดาษสีเหลืองเคลือบกรด)
-    chemDesc: 'เบกกิ้งโซดามีฤทธิ์เป็นเบสอ่อน เหมาะกับการทดสอบด้วยชุด B (กระดาษสีเหลืองเคลือบกรด) โดยจะเปลี่ยนจากสีเหลืองเป็นสีแดงสด'
+    correctSet: 'B',
+    correctDesc: 'ถูกต้อง! เบกกิ้งโซดามีฤทธิ์เป็นเบส ต้องใช้ชุด B (กระดาษสีเหลืองเคลือบกรด) ซึ่งจะเปลี่ยนเป็นสีแดงสดเมื่อทำปฏิกิริยา',
+    distance: 28,
   },
   {
     id: 'soapy-water',
     name: 'น้ำสบู่ (Soapy water)',
     type: 'เบสอ่อน',
-    correctSet: 'B', // ต้องใช้ชุด B
-    chemDesc: 'น้ำสบู่มีฤทธิ์เป็นเบส เหมาะกับการทดสอบด้วยชุด B (กระดาษสีเหลืองเคลือบกรด) โดยจะเปลี่ยนจากสีเหลืองเป็นสีแดงสดอย่างชัดเจน'
+    correctSet: 'B',
+    correctDesc: 'ถูกต้อง! น้ำสบู่มีฤทธิ์เป็นเบส ต้องใช้ชุด B (กระดาษสีเหลืองเคลือบกรด) เพื่อให้เกิดการเปลี่ยนสีเป็นสีแดงสดอย่างชัดเจน',
+    distance: 22,
   },
 ]
 
@@ -44,26 +48,35 @@ type Props = {
 
 export function StepHousehold({ onBack }: Props) {
   const [selectedSample, setSelectedSample] = useState(HOUSEHOLD_SAMPLES[0])
-  const [selectedSet, setSelectedSet] = useState<'A' | 'B'>('A')
+  const [chosenSet, setChosenSet] = useState<'A' | 'B' | null>(null)
   const [tested, setTested] = useState(false)
 
-  const isCorrect = selectedSet === selectedSample.correctSet
-  
-  // สีและระยะทางจำลองของแต่ละชุด
-  const setAColor = '#ff1a1a' // แดงสด
-  const setAReacted = '#f6b319' // เหลือง
-  const distanceA = 15
+  const setAInfo = {
+    paperColor: '#ff1a1a',
+    reactedColor: '#f6b319',
+    title: 'ชุด A: กระดาษสีแดง (เคลือบเบส)',
+  }
 
-  const setBColor = '#f2c230' // เหลือง
-  const setBReacted = '#e60000' // แดงสด
-  const distanceB = 25
+  const setBInfo = {
+    paperColor: '#f2c230',
+    reactedColor: '#e60000',
+    title: 'ชุด B: กระดาษสีเหลือง (เคลือบกรด)',
+  }
+
+  const handleSelectSample = (sample: typeof HOUSEHOLD_SAMPLES[0]) => {
+    setSelectedSample(sample)
+    setChosenSet(null)
+    setTested(false)
+  }
+
+  const isCorrect = chosenSet === selectedSample.correctSet
 
   return (
     <div className="flex flex-col gap-6">
       <StepHeading
         step={5}
         title="ทดสอบกับสารในครัวเรือน (Real-world Household Testing)"
-        subtitle="เลือกสารตัวอย่าง และเลือกชุดกระดาษ µPADs (ชุด A หรือ ชุด B) ที่เหมาะสมในการทดสอบ เพื่อดูการเปลี่ยนสีและปฏิกิริยา"
+        subtitle="เลือกสารตัวอย่าง เลือกชุดกระดาษ µPADs ที่เหมาะสม (ชุด A หรือ B) แล้วทำการหยดทดสอบเพื่อดูการเปลี่ยนสีและระยะการเคลื่อนที่"
       />
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -74,10 +87,7 @@ export function StepHousehold({ onBack }: Props) {
               <button
                 key={sample.id}
                 type="button"
-                onClick={() => {
-                  setSelectedSample(sample)
-                  setTested(false)
-                }}
+                onClick={() => handleSelectSample(sample)}
                 className={cn(
                   'flex items-center justify-between rounded-xl border p-3 text-left transition-colors',
                   selectedSample.id === sample.id ? 'border-primary bg-primary/10' : 'border-border bg-card hover:border-primary/60',
@@ -92,133 +102,68 @@ export function StepHousehold({ onBack }: Props) {
             ))}
           </div>
 
-          <h3 className="mt-2 text-sm font-semibold text-foreground">2. เลือกชุดกระดาษ $\mu\text{PADs}$ สำหรับทดสอบ</h3>
+          <h3 className="mt-2 text-sm font-semibold text-foreground">2. เลือกชุดกระดาษ µPADs สำหรับทดสอบ</h3>
           <div className="grid grid-cols-2 gap-3">
             <button
               type="button"
               onClick={() => {
-                setSelectedSet('A')
+                setChosenSet('A')
                 setTested(false)
               }}
               className={cn(
                 'flex flex-col items-center gap-2 rounded-xl border p-4 text-center transition-all',
-                selectedSet === 'A' ? 'border-red-500 bg-red-500/10 ring-2 ring-red-500/30' : 'border-border bg-card hover:border-red-500/50'
+                chosenSet === 'A' ? 'border-red-500 bg-red-500/10 shadow-md' : 'border-border bg-card hover:border-red-500/50'
               )}
             >
-              <div className="h-10 w-6 rounded bg-[#ff1a1a] shadow" />
-              <div>
-                <span className="block font-semibold text-foreground">ชุด A</span>
-                <span className="text-[11px] text-muted-foreground">กระดาษสีแดง (เคลือบเบส)</span>
-              </div>
-              {selectedSet === 'A' && <CheckCircle2 className="size-5 text-red-500" />}
+              <div className="h-10 w-8 rounded bg-[#ff1a1a] shadow" />
+              <span className="text-xs font-semibold text-foreground">ชุด A (กระดาษแดง)</span>
+              {chosenSet === 'A' && (
+                selectedSample.correctSet === 'A' ? (
+                  <span className="flex items-center gap-1 text-[11px] font-bold text-green-500"><CheckCircle2 className="size-4" /> ถูกต้อง</span>
+                ) : (
+                  <span className="flex items-center gap-1 text-[11px] font-bold text-red-500"><XCircle className="size-4" /> ลองใหม่อีกครั้ง</span>
+                )
+              )}
             </button>
 
             <button
               type="button"
               onClick={() => {
-                setSelectedSet('B')
+                setChosenSet('B')
                 setTested(false)
               }}
               className={cn(
                 'flex flex-col items-center gap-2 rounded-xl border p-4 text-center transition-all',
-                selectedSet === 'B' ? 'border-amber-400 bg-amber-400/10 ring-2 ring-amber-400/30' : 'border-border bg-card hover:border-amber-400/50'
+                chosenSet === 'B' ? 'border-amber-500 bg-amber-500/10 shadow-md' : 'border-border bg-card hover:border-amber-500/50'
               )}
             >
-              <div className="h-10 w-6 rounded bg-[#f2c230] shadow" />
-              <div>
-                <span className="block font-semibold text-foreground">ชุด B</span>
-                <span className="text-[11px] text-muted-foreground">กระดาษสีเหลือง (เคลือบกรด)</span>
-              </div>
-              {selectedSet === 'B' && <CheckCircle2 className="size-5 text-amber-400" />}
+              <div className="h-10 w-8 rounded bg-[#f2c230] shadow" />
+              <span className="text-xs font-semibold text-foreground">ชุด B (กระดาษเหลือง)</span>
+              {chosenSet === 'B' && (
+                selectedSample.correctSet === 'B' ? (
+                  <span className="flex items-center gap-1 text-[11px] font-bold text-green-500"><CheckCircle2 className="size-4" /> ถูกต้อง</span>
+                ) : (
+                  <span className="flex items-center gap-1 text-[11px] font-bold text-red-500"><XCircle className="size-4" /> ลองใหม่อีกครั้ง</span>
+                )
+              )}
             </button>
           </div>
 
-          <Button size="lg" onClick={() => setTested(true)} className="mt-2">
-            <Beaker aria-hidden="true" />
-            หยด {selectedSample.name} ลงบนกระดาษชุด {selectedSet}
-          </Button>
+          {isCorrect && (
+            <Button size="lg" onClick={() => setTested(true)} className="mt-2 bg-green-600 text-white hover:bg-green-700">
+              <Beaker aria-hidden="true" />
+              หยด{selectedSample.name} ลงบนกระดาษชุด {chosenSet}
+            </Button>
+          )}
         </Panel>
 
         <Panel className="flex flex-col items-center justify-center gap-4 text-center">
-          <h3 className="text-sm font-semibold text-foreground">ผลการทดสอบกระดาษทั้ง 2 ชุด</h3>
+          <h3 className="text-sm font-semibold text-foreground">ผลการทดสอบ: {selectedSample.name}</h3>
 
-          {/* แสดงกระดาษ 2 ชุดเทียบกัน */}
-          <div className="flex items-center justify-center gap-6">
-            
-            {/* ชุด A */}
-            <div className={cn('relative flex h-72 w-32 flex-col items-end justify-center rounded-2xl border p-3 transition-all', selectedSet === 'A' ? 'border-primary bg-primary/5 shadow-md' : 'border-border bg-card/50 opacity-60')}>
-              <span className="absolute top-2 left-1/2 -translate-x-1/2 text-xs font-bold text-foreground">ชุด A (แดง)</span>
-              <div
-                className="relative aspect-[3/4] w-20 rounded-md shadow-lg mx-auto mt-6"
-                style={{ backgroundColor: setAColor }}
-              >
-                <div className="absolute bottom-1 left-1/2 size-2.5 -translate-x-1/2 rounded-full border border-white/40 bg-white/20" />
-                {tested && selectedSet === 'A' && (
-                  <div
-                    className="absolute inset-x-0 bottom-0 animate-migrate"
-                    style={{
-                      height: `${distanceA * 3.5}px`,
-                      background: `linear-gradient(to top, ${setAReacted} 0%, ${setAReacted} 85%, ${mixHex(setAReacted, setAColor, 0.5)} 100%)`,
-                      borderRadius: '2px 2px 0 0'
-                    }}
-                  />
-                )}
-              </div>
-              <span className="mx-auto mt-2 font-mono text-[10px] text-muted-foreground">
-                {tested && selectedSet === 'A' ? `${distanceA} mm` : 'รอดำเนินการ'}
-              </span>
-            </div>
-
-            {/* ชุด B */}
-            <div className={cn('relative flex h-72 w-32 flex-col items-end justify-center rounded-2xl border p-3 transition-all', selectedSet === 'B' ? 'border-primary bg-primary/5 shadow-md' : 'border-border bg-card/50 opacity-60')}>
-              <span className="absolute top-2 left-1/2 -translate-x-1/2 text-xs font-bold text-foreground">ชุด B (เหลือง)</span>
-              <div
-                className="relative aspect-[3/4] w-20 rounded-md shadow-lg mx-auto mt-6"
-                style={{ backgroundColor: setBColor }}
-              >
-                <div className="absolute bottom-1 left-1/2 size-2.5 -translate-x-1/2 rounded-full border border-white/40 bg-white/20" />
-                {tested && selectedSet === 'B' && (
-                  <div
-                    className="absolute inset-x-0 bottom-0 animate-migrate"
-                    style={{
-                      height: `${distanceB * 3.5}px`,
-                      background: `linear-gradient(to top, ${setBReacted} 0%, ${setBReacted} 85%, ${mixHex(setBReacted, setBColor, 0.5)} 100%)`,
-                      borderRadius: '2px 2px 0 0'
-                    }}
-                  />
-                )}
-              </div>
-              <span className="mx-auto mt-2 font-mono text-[10px] text-muted-foreground">
-                {tested && selectedSet === 'B' ? `${distanceB} mm` : 'รอดำเนินการ'}
-              </span>
-            </div>
-
-          </div>
-
-          {tested && (
-            <Notice tone={isCorrect ? 'success' : 'warning'} className="w-full text-left">
-              <div className="flex items-start gap-2">
-                {isCorrect ? (
-                  <CheckCircle2 className="size-5 text-success shrink-0 mt-0.5" />
-                ) : (
-                  <AlertCircle className="size-5 text-amber-500 shrink-0 mt-0.5" />
-                )}
-                <div>
-                  <p className="font-semibold">
-                    {isCorrect ? 'ถูกต้อง! คุณเลือกชุดกระดาษได้เหมาะสมกับการทดสอบ' : 'ข้อสังเกต: สารนี้ควรใช้ชุดกระดาษอีกชุดหนึ่งในการทดสอบจึงจะเกิดปฏิกิริยาชัดเจน'}
-                  </p>
-                  <p className="text-xs mt-1 opacity-90">{selectedSample.chemDesc}</p>
-                </div>
-              </div>
-            </Notice>
-          )}
-
-          <Button variant="outline" size="sm" onClick={onBack} className="mt-2">
-            <ArrowLeft aria-hidden="true" />
-            กลับสู่หน้าหลัก Virtual Lab
-          </Button>
-        </Panel>
-      </div>
-    </div>
-  )
-}
+          <div className="flex flex-wrap items-center justify-center gap-6">
+            <div className={cn('flex flex-col items-center gap-2 rounded-2xl border p-4 transition-all', chosenSet === 'A' ? 'border-primary bg-card shadow-lg' : 'border-border/50 bg-card/40 opacity-60')}>
+              <span className="text-xs font-medium text-muted-foreground">ชุด A (กระดาษแดง)</span>
+              <div className="relative flex h-64 w-32 items-end justify-center rounded-xl border border-border bg-[#0d1f38] p-4 shadow-inner">
+                <div
+                  className="relative aspect-[3/4] w-24 rounded-md shadow-lg"
+                  style={{ backgroundColor: setAInfo
