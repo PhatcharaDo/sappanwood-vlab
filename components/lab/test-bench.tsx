@@ -24,29 +24,19 @@ export function reactedColor(set: SetId, index: number) {
 type TestBenchProps = {
   set: SetId
   tested: boolean[]
+  distances: number[]
   animateIndex?: number | null
   onStripClick?: (index: number) => void
   showHint?: boolean
   selectedIndex?: number | null
 }
 
-export function TestBench({ set, tested, animateIndex = null, onStripClick, showHint = false, selectedIndex = null }: TestBenchProps) {
+export function TestBench({ set, tested, distances, animateIndex = null, onStripClick, showHint = false, selectedIndex = null }: TestBenchProps) {
   const info = SET_INFO[set]
   const benchRef = useRef<HTMLDivElement>(null)
   const dragOffset = useRef<number | null>(null)
   const [rulerX, setRulerX] = useState(28)
   const [cursorMm, setCursorMm] = useState<number | null>(null)
-
-  // ระบบสุ่มระยะทาง: เรียงลำดับจากน้อยไปมากตามความเข้มข้น และมีระยะห่างเหมาะสม
-  const [randomDistances] = useState<number[]>(() => {
-    const distances: number[] = []
-    let current = Math.floor(Math.random() * 6) + 12 // เริ่มต้นที่ประมาณ 12-17 mm
-    for (let i = 0; i < CONCENTRATIONS.length; i++) {
-      distances.push(current)
-      current += Math.floor(Math.random() * 5) + 8 // เว้นระยะห่างแต่ละระดับ 8-12 mm
-    }
-    return distances
-  })
 
   const clampX = (x: number) => Math.max(0, Math.min(BENCH_W - RULER_W, x))
 
@@ -96,7 +86,7 @@ export function TestBench({ set, tested, animateIndex = null, onStripClick, show
 
         {CONCENTRATIONS.map((conc, i) => {
           const left = STRIP_X0 + i * STRIP_GAP
-          const migrated = tested[i] ? randomDistances[i] * PX_PER_MM : 0
+          const migrated = tested[i] ? distances[i] * PX_PER_MM : 0
           const label = `แถบที่ ${i + 1} สำหรับ ${info.testReagent} ${conc.toFixed(1)} M${tested[i] ? ' (หยดแล้ว)' : ''}`
           const content = (
             <>
@@ -202,7 +192,7 @@ export function TestBench({ set, tested, animateIndex = null, onStripClick, show
               mm
             </text>
             {showHint &&
-              randomDistances.map((mm, i) => {
+              distances.map((mm, i) => {
                 const y = RULER_H - mm * PX_PER_MM
                 return (
                   <g key={`hint-${mm}`}>
