@@ -34,8 +34,10 @@ export function VirtualLab() {
   })
   const [graphed, setGraphed] = useState(false)
   const [showHousehold, setShowHousehold] = useState(false)
-  
-  // โหลดและบันทึกสถานะการทดสอบสารครัวเรือนผ่าน localStorage เพื่อไม่ให้รีเซ็ตเมื่อเข้า-ออก
+  const [showCompletion, setShowCompletion] = useState(false)
+  const [isBypassed, setIsBypassed] = useState(false)
+
+  // ดึงค่าสถานะจาก localStorage ทันที เพื่อความแม่นยำไม่รีเซ็ต
   const [householdTestedMap, setHouseholdTestedMap] = useState<Record<string, boolean>>(() => {
     if (typeof window !== 'undefined') {
       try {
@@ -58,9 +60,6 @@ export function VirtualLab() {
     }
   }, [householdTestedMap])
 
-  const [showCompletion, setShowCompletion] = useState(false)
-  const [isBypassed, setIsBypassed] = useState(false)
-
   const [randomDistances] = useState<Record<SetId, number[]>>({
     A: generateRandomDistances(),
     B: generateRandomDistances(),
@@ -75,7 +74,7 @@ export function VirtualLab() {
         graphed,
       ]
 
-  // เช็คเงื่อนไขความสำเร็จแบบรัดกุม: ต้องทดสอบครบทั้ง 4 ตัวอย่างจริง ๆ เท่านั้น
+  // เช็คเงื่อนไขความสำเร็จ: ต้องผ่านครบทั้ง 4 สารอย่างแท้จริงเท่านั้น
   const isHouseholdFullyCompleted = 
     Boolean(householdTestedMap['vinegar']) &&
     Boolean(householdTestedMap['lime']) &&
@@ -93,11 +92,14 @@ export function VirtualLab() {
     if (!isBypassed) {
       setExtracted(true)
       setCoated({ A: true, B: true })
-      setTested({ A: Array(5).fill(true), B: Array(5).fill(true) })
+      setTested({ A: Array(5).fill(true), B: Array(5).fill(true })
       setGraphed(true)
-      setHouseholdTestedMap({ vinegar: true, lime: true, 'baking-soda': true, 'soapy-water': true })
+      const fullMap = { vinegar: true, lime: true, 'baking-soda': true, 'soapy-water': true }
+      setHouseholdTestedMap(fullMap)
+      localStorage.setItem('household_tested_map', JSON.stringify(fullMap))
     } else {
       setHouseholdTestedMap({})
+      localStorage.removeItem('household_tested_map')
     }
     setIsBypassed((prev) => !prev)
   }
@@ -257,7 +259,7 @@ export function VirtualLab() {
                   ไปสู่การทดลองพิเศษ: สารในครัวเรือน (Household Testing)
                 </Button>
 
-                {/* แสดงปุ่มจบหลักสูตรเฉพาะเมื่อทำในครัวครบทั้ง 4 ตัวแล้วจริงๆ เท่านั้น */}
+                {/* ปุ่มจบหลักสูตรจะแสดงต่อเมื่อทำในครัวครบทั้ง 4 สารแล้วจริงๆ เท่านั้น */}
                 {(isHouseholdFullyCompleted || isBypassed) && (
                   <Button size="lg" variant="default" className="gap-2 bg-green-600 text-white hover:bg-green-700 shadow-lg animate-bounce" onClick={() => setShowCompletion(true)}>
                     <Award className="size-5" />
