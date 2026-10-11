@@ -133,7 +133,7 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
             <FileText className="size-6 text-primary" />
             <h3 className="text-lg font-semibold text-foreground">เอกสารใบงานการทดลอง (Worksheet & Reports)</h3>
           </div>
-          <p className="mb-4 text-sm text-muted-foreground">ดาวน์โหลดสรุปผลการทดลอง ระยะการเคลื่อนที่ และกราฟความเข้มข้นเพื่อใช้ประกอบรายงาน</p>
+          <p className="mb-4 text-sm text-muted-foreground">ดาวน์โหลดเอกสารเพื่อใช้ประกอบการทำรายงาน</p>
           
           <a
             href="/worksheet.pdf"
