@@ -37,28 +37,21 @@ export function VirtualLab() {
   const [showCompletion, setShowCompletion] = useState(false)
   const [isBypassed, setIsBypassed] = useState(false)
 
-  // โหลดสถานะจาก localStorage แบบปลอดภัย
-  const [householdTestedMap, setHouseholdTestedMap] = useState<Record<string, boolean>>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem('household_tested_map')
-        return saved ? JSON.parse(saved) : {}
-      } catch {
-        return {}
-      }
-    }
-    return {}
-  })
+  // ดึงค่าจาก localStorage โดยเริ่มต้นด้วยค่าว่างก่อนเสมอเพื่อป้องกันปุ่มโผล่ล่วงหน้า
+  const [householdTestedMap, setHouseholdTestedMap] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
-        localStorage.setItem('household_tested_map', JSON.stringify(householdTestedMap))
+        const saved = localStorage.getItem('household_tested_map')
+        if (saved) {
+          setHouseholdTestedMap(JSON.parse(saved))
+        }
       } catch (e) {
         console.error(e)
       }
     }
-  }, [householdTestedMap])
+  }, [])
 
   const [randomDistances] = useState<Record<SetId, number[]>>({
     A: generateRandomDistances(),
@@ -74,10 +67,12 @@ export function VirtualLab() {
         graphed,
       ]
 
-  // เช็คเงื่อนไขความสำเร็จ: ต้องผ่านครบทั้ง 4 สาร (vinegar, lime, baking-soda, soapy-water) จริงๆ เท่านั้นถึงจะเป็น true
-  const requiredKeys = ['vinegar', 'lime', 'baking-soda', 'soapy-water']
+  // เช็คว่าทำในครัวเรือนครบ 4 สาร (vinegar, lime, baking-soda, soapy-water) จริงๆ
   const isHouseholdFullyCompleted = 
-    requiredKeys.every((key) => householdTestedMap[key] === true)
+    householdTestedMap['vinegar'] === true &&
+    householdTestedMap['lime'] === true &&
+    householdTestedMap['baking-soda'] === true &&
+    householdTestedMap['soapy-water'] === true
 
   function goTo(step: number) {
     setShowHousehold(false)
@@ -94,6 +89,7 @@ export function VirtualLab() {
       setGraphed(true)
       const fullMap = { vinegar: true, lime: true, 'baking-soda': true, 'soapy-water': true }
       setHouseholdTestedMap(fullMap)
+      localStorage.setItem('household_tested_map', JSON.stringify(fullMap))
     } else {
       setHouseholdTestedMap({})
       localStorage.removeItem('household_tested_map')
@@ -101,6 +97,7 @@ export function VirtualLab() {
     setIsBypassed((prev) => !prev)
   }
 
+  // หน้าจอจบหลักสูตร (ใบประกาศนียบัตร/ใบงาน/ติดต่อผู้พัฒนา)
   if (showCompletion) {
     return (
       <div className="flex min-h-dvh flex-col">
@@ -170,6 +167,7 @@ export function VirtualLab() {
     )
   }
 
+  // หน้าทดสอบสารในครัวเรือน
   if (showHousehold) {
     return (
       <div className="flex min-h-dvh flex-col">
@@ -189,7 +187,6 @@ export function VirtualLab() {
           <StepHousehold
             testedMap={householdTestedMap}
             setTestedMap={setHouseholdTestedMap}
-            onCompleteCourse={() => setShowCompletion(true)}
             onBack={() => setShowHousehold(false)}
           />
         </main>
@@ -256,7 +253,7 @@ export function VirtualLab() {
                   ไปสู่การทดลองพิเศษ: สารในครัวเรือน (Household Testing)
                 </Button>
 
-                {/* แสดงปุ่มจบหลักสูตรเฉพาะเมื่อทำครบทั้ง 4 ตัวอย่างจริงๆ เท่านั้น */}
+                {/* ปุ่มจบหลักสูตรจะปรากฏที่นี่ หลังกลับมาจากห้องครัวและทำครบแล้วเท่านั้น */}
                 {(isHouseholdFullyCompleted || isBypassed) && (
                   <Button size="lg" variant="default" className="gap-2 bg-green-600 text-white hover:bg-green-700 shadow-lg animate-bounce" onClick={() => setShowCompletion(true)}>
                     <Award className="size-5" />
