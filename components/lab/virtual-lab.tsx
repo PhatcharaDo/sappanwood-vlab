@@ -11,8 +11,9 @@ import { StepMeasurement } from './step-measurement'
 import { StepNav } from './step-nav'
 import { StepTesting } from './step-testing'
 import { StepHousehold } from './step-household'
+import { StepCompletion } from './step-completion'
 import { Button } from '@/components/ui/button'
-import { Beaker, Unlock, Award, FileText, Mail, Phone, User, ArrowLeft, Printer } from 'lucide-react'
+import { Beaker, Unlock, Award } from 'lucide-react'
 
 function generateRandomDistances() {
   const distances: number[] = []
@@ -37,7 +38,7 @@ export function VirtualLab() {
   const [showCompletion, setShowCompletion] = useState(false)
   const [isBypassed, setIsBypassed] = useState(false)
 
-  // เริ่มต้นเป็นวัตถุว่างเปล่าเสมอ ไม่ดึงค่าค้างจาก localStorage
+  // เริ่มต้นเป็นวัตถุว่างเปล่าเสมอ เพื่อไม่ให้มีผลงานค้างหรือปุ่มจบหลักสูตรโผล่ขึ้นมาก่อน
   const [householdTestedMap, setHouseholdTestedMap] = useState<Record<string, boolean>>({})
 
   const [randomDistances] = useState<Record<SetId, number[]>>({
@@ -54,7 +55,7 @@ export function VirtualLab() {
         graphed,
       ]
 
-  // เช็คว่าผู้เล่นทดสอบครบทั้ง 4 ตัวจริงแล้วหรือไม่
+  // ตรวจสอบว่าผู้เล่นทดสอบสารในครัวเรือนครบทั้ง 4 ตัวจริงๆ แล้วหรือไม่
   const isHouseholdFullyCompleted = 
     householdTestedMap['vinegar'] === true &&
     householdTestedMap['lime'] === true &&
@@ -81,22 +82,18 @@ export function VirtualLab() {
     setIsBypassed((prev) => !prev)
   }
 
-  // หน้าจบหลักสูตร
-import { StepCompletion } from './step-completion'
+  // หากอยู่ในหน้าจบหลักสูตร (เรียกใช้งานผ่านคอมโพเนนต์แยก step-completion.tsx)
+  if (showCompletion) {
+    return (
+      <div className="flex min-h-dvh flex-col">
+        <SiteHeader />
+        <StepCompletion onBack={() => setShowCompletion(false)} />
+        <SiteFooter />
+      </div>
+    )
+  }
 
-// ...
-if (showCompletion) {
-  return (
-    <div className="flex min-h-dvh flex-col">
-      <SiteHeader />
-      <StepCompletion onBack={() => setShowCompletion(false)} />
-      <SiteFooter />
-    </div>
-  )
-}
-// ...
-
-  // หน้าทดสอบสารในครัวเรือน
+  // หากอยู่ในหน้าทดสอบสารในครัวเรือน
   if (showHousehold) {
     return (
       <div className="flex min-h-dvh flex-col">
@@ -182,7 +179,7 @@ if (showCompletion) {
                   ไปสู่การทดลองพิเศษ: สารในครัวเรือน (Household Testing)
                 </Button>
 
-                {/* ปุ่มจบหลักสูตรจะโผล่ขึ้นมาที่นี่ หลังผู้เล่นทำในครัวเรือนครบแล้วกดกลับมาเท่านั้น */}
+                {/* ปุ่มจบหลักสูตรจะแสดงขึ้นมาก็ต่อเมื่อทำในครัวครบแล้วและกดกลับมาหน้าหลักเท่านั้น */}
                 {(isHouseholdFullyCompleted || isBypassed) && (
                   <Button size="lg" variant="default" className="gap-2 bg-green-600 text-white hover:bg-green-700 shadow-lg animate-bounce" onClick={() => setShowCompletion(true)}>
                     <Award className="size-5" />
