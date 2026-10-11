@@ -21,7 +21,8 @@ type Props = {
 }
 
 export function StepHousehold({ testedMap, setTestedMap, onBack }: Props) {
-  const [samples] = useState(() => [...ITEMS])
+  // สุ่มลำดับ array ของ ITEMS ทันทีเมื่อโหลดคอมโพเนนต์ครั้งแรก
+  const [samples] = useState(() => [...ITEMS].sort(() => Math.random() - 0.5))
   const [selected, setSelected] = useState(samples[0])
   const [chosenSet, setChosenSet] = useState<'A' | 'B' | null>(() => {
     return testedMap[samples[0].id] ? (samples[0].correctSet as 'A' | 'B') : null
