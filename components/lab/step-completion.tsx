@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { Award, FileText, Mail, Phone, User, ArrowLeft, CheckCircle2 } from 'lucide-react'
+import { Award, FileText, Mail, Phone, User, ArrowLeft, CheckCircle2, Facebook, Instagram } from 'lucide-react'
 
 type StepCompletionProps = {
   onBack: () => void
@@ -15,7 +15,6 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
   })
   const [isSubmitted, setIsSubmitted] = useState(false)
 
-  // โหลดข้อมูลจาก localStorage เพื่อล็อคชื่อไว้ไม่ให้ผู้อื่นเปลี่ยนซ้ำซ้อน
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
@@ -96,7 +95,6 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
             </form>
           </section>
         ) : (
-          /* ดีไซน์เกียรติบัตร (Certificate) ล็อคข้อมูลแล้ว ไม่มีปุ่มพิมพ์และปุ่มแก้ไข */
           <section className="relative overflow-hidden rounded-2xl border-4 border-amber-500/40 bg-card p-8 text-center shadow-2xl md:p-12">
             <div className="absolute right-4 top-4 rounded-full bg-amber-500/10 p-3">
               <Award className="size-10 text-amber-500" />
@@ -125,19 +123,28 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
           </section>
         )}
 
-        {/* ส่วนที่ 3: เอกสารใบงาน (Worksheet) */}
+        {/* ส่วนที่ 3: เอกสารใบงาน (Worksheet) - รองรับลิงก์ไฟล์ PDF */}
         <section className="rounded-2xl border border-border bg-card p-6 shadow-md">
           <div className="mb-4 flex items-center gap-3">
             <FileText className="size-6 text-primary" />
             <h3 className="text-lg font-semibold text-foreground">เอกสารใบงานการทดลอง (Worksheet & Reports)</h3>
           </div>
           <p className="mb-4 text-sm text-muted-foreground">ดาวน์โหลดสรุปผลการทดลอง ระยะการเคลื่อนที่ และกราฟความเข้มข้นเพื่อใช้ประกอบรายงาน</p>
-          <Button variant="outline" className="gap-2">
-            📄 ดาวน์โหลดไฟล์ใบงานสรุปผลการทดลอง (.PDF)
-          </Button>
+          
+          {/* วิธีใส่ไฟล์ PDF: นำไฟล์ .pdf ไปไว้ในโฟลเดอร์ public ของโปรเจกต์ แล้วเปลี่ยนชื่อไฟล์ตรง href ด้านล่างนี้ */}
+          <a
+            href="/worksheet.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            download="Worksheet-VirtualLab.pdf"
+          >
+            <Button variant="outline" className="gap-2 cursor-pointer">
+              📄 ดาวน์โหลดไฟล์ใบงานสรุปผลการทดลอง (.PDF)
+            </Button>
+          </a>
         </section>
 
-        {/* ส่วนที่ 4: ข้อมูลผู้พัฒนา */}
+        {/* ส่วนที่ 4: ข้อมูลผู้พัฒนา พร้อมช่องทาง Facebook และ Instagram */}
         <section className="rounded-2xl border border-border bg-card p-6 shadow-md">
           <div className="mb-4 flex items-center gap-3">
             <User className="size-6 text-primary" />
@@ -159,6 +166,14 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
             <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-muted/30 p-3">
               <Phone className="size-4 text-primary" />
               <span>โทรศัพท์: 08x-xxx-xxxx</span>
+            </div>
+            <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-muted/30 p-3">
+              <Facebook className="size-4 text-primary" />
+              <span>Facebook: Phatchara Dounguapa</span>
+            </div>
+            <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-muted/30 p-3">
+              <Instagram className="size-4 text-primary" />
+              <span>Instagram: @james_phatchara</span>
             </div>
           </div>
         </section>
