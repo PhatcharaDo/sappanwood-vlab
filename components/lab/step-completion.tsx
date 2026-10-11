@@ -156,7 +156,7 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
           <div className="grid gap-3 text-sm text-muted-foreground md:grid-cols-2">
             <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-muted/30 p-3">
               <User className="size-4 text-primary" />
-              <span>ผู้พัฒนา: พชร ดวงอุปะ (James) - ม.6/2</span>
+              <span>ผู้พัฒนา: พชร ดวงอุปะ (เพชร) - ม.6/2</span>
             </div>
             <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-muted/30 p-3">
               <span className="text-xs font-semibold text-primary">โรงเรียน:</span>
@@ -164,11 +164,11 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
             </div>
             <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-muted/30 p-3">
               <Mail className="size-4 text-primary" />
-              <span>อีเมลติดต่อ: phatchara@example.com</span>
+              <span>อีเมลติดต่อ: petcchyy9@gmail.com</span>
             </div>
             <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-muted/30 p-3">
               <Phone className="size-4 text-primary" />
-              <span>โทรศัพท์: 08x-xxx-xxxx</span>
+              <span>โทรศัพท์: 099-302-1693</span>
             </div>
             <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-muted/30 p-3">
               <svg className="size-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -182,7 +182,7 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
                 <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
                 <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
               </svg>
-              <span>Instagram: @james_phatchara</span>
+              <span>Instagram: @p_.pxztt</span>
             </div>
           </div>
         </section>
