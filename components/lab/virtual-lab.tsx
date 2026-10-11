@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { CONCENTRATIONS, type SetId } from '@/lib/lab'
 import { cn } from '@/lib/utils'
 import { SiteFooter } from './site-footer'
@@ -37,21 +37,8 @@ export function VirtualLab() {
   const [showCompletion, setShowCompletion] = useState(false)
   const [isBypassed, setIsBypassed] = useState(false)
 
-  // ดึงค่าจาก localStorage โดยเริ่มต้นด้วยค่าว่างก่อนเสมอเพื่อป้องกันปุ่มโผล่ล่วงหน้า
+  // เริ่มต้นเป็นวัตถุว่างเปล่าเสมอ ไม่ดึงค่าค้างจาก localStorage
   const [householdTestedMap, setHouseholdTestedMap] = useState<Record<string, boolean>>({})
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem('household_tested_map')
-        if (saved) {
-          setHouseholdTestedMap(JSON.parse(saved))
-        }
-      } catch (e) {
-        console.error(e)
-      }
-    }
-  }, [])
 
   const [randomDistances] = useState<Record<SetId, number[]>>({
     A: generateRandomDistances(),
@@ -67,7 +54,7 @@ export function VirtualLab() {
         graphed,
       ]
 
-  // เช็คว่าทำในครัวเรือนครบ 4 สาร (vinegar, lime, baking-soda, soapy-water) จริงๆ
+  // เช็คว่าผู้เล่นทดสอบครบทั้ง 4 ตัวจริงแล้วหรือไม่
   const isHouseholdFullyCompleted = 
     householdTestedMap['vinegar'] === true &&
     householdTestedMap['lime'] === true &&
@@ -87,17 +74,14 @@ export function VirtualLab() {
       setCoated({ A: true, B: true })
       setTested({ A: Array(5).fill(true), B: Array(5).fill(true) })
       setGraphed(true)
-      const fullMap = { vinegar: true, lime: true, 'baking-soda': true, 'soapy-water': true }
-      setHouseholdTestedMap(fullMap)
-      localStorage.setItem('household_tested_map', JSON.stringify(fullMap))
+      setHouseholdTestedMap({ vinegar: true, lime: true, 'baking-soda': true, 'soapy-water': true })
     } else {
       setHouseholdTestedMap({})
-      localStorage.removeItem('household_tested_map')
     }
     setIsBypassed((prev) => !prev)
   }
 
-  // หน้าจอจบหลักสูตร (ใบประกาศนียบัตร/ใบงาน/ติดต่อผู้พัฒนา)
+  // หน้าจบหลักสูตร
   if (showCompletion) {
     return (
       <div className="flex min-h-dvh flex-col">
@@ -253,7 +237,7 @@ export function VirtualLab() {
                   ไปสู่การทดลองพิเศษ: สารในครัวเรือน (Household Testing)
                 </Button>
 
-                {/* ปุ่มจบหลักสูตรจะปรากฏที่นี่ หลังกลับมาจากห้องครัวและทำครบแล้วเท่านั้น */}
+                {/* ปุ่มจบหลักสูตรจะโผล่ขึ้นมาที่นี่ หลังผู้เล่นทำในครัวเรือนครบแล้วกดกลับมาเท่านั้น */}
                 {(isHouseholdFullyCompleted || isBypassed) && (
                   <Button size="lg" variant="default" className="gap-2 bg-green-600 text-white hover:bg-green-700 shadow-lg animate-bounce" onClick={() => setShowCompletion(true)}>
                     <Award className="size-5" />
