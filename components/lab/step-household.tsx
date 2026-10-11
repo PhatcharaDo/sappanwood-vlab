@@ -7,7 +7,6 @@ import { Notice, Panel, StepHeading } from './lab-ui'
 import { cn } from '@/lib/utils'
 import { mixHex } from '@/lib/lab'
 
-// ข้อมูลสารตัวอย่าง (ซ่อนประเภทไว้เพื่อให้นักเรียนวิเคราะห์เอง)
 const INITIAL_HOUSEHOLD_SAMPLES = [
   {
     id: 'vinegar',
@@ -44,7 +43,6 @@ type Props = {
 }
 
 export function StepHousehold({ onBack }: Props) {
-  // สลับลำดับสาร 4 ตัวอย่างแบบสุ่มเมื่อเริ่มเข้าหน้าเว็บ
   const [samples] = useState(() => [...INITIAL_HOUSEHOLD_SAMPLES].sort(() => Math.random() - 0.5))
   
   const [selectedSample, setSelectedSample] = useState(samples[0])
@@ -65,15 +63,22 @@ export function StepHousehold({ onBack }: Props) {
 
   const handleSelectSample = (sample: typeof samples[0]) => {
     setSelectedSample(sample)
-    setChosenSet(null)
+    // ถ้าสารที่เลือกเคยทดสอบแล้ว ให้ล็อคชุดไว้ที่ correctSet ทันที ถ้ายังไม่เคยให้ล้างตัวเลือก
+    if (testedSamples[sample.id]) {
+      setChosenSet(sample.correctSet as 'A' | 'B')
+    } else {
+      setChosenSet(null)
+    }
   }
 
   const handleTest = () => {
     setTestedSamples((prev) => ({ ...prev, [selectedSample.id]: true }))
   }
 
-  const isCorrect = chosenSet === selectedSample.correctSet
   const isTested = !!testedSamples[selectedSample.id]
+  // หากทดสอบแล้ว ให้ถือว่าเลือกถูกเสมอ (เพราะผ่านการกรองจนกดทดสอบ)
+  const activeChosenSet = isTested ? selectedSample.correctSet : chosenSet
+  const isCorrect = activeChosenSet === selectedSample.correctSet
   const allCompleted = samples.every((s) => testedSamples[s.id])
 
   return (
@@ -85,7 +90,7 @@ export function StepHousehold({ onBack }: Props) {
       />
 
       {allCompleted && (
-        <Notice tone="success" className="flex items-center justify-between p-4 bg-green-500/10 border-green-500/30">
+        <Notice tone="success" className="flex items-center justify-between border-green-500/30 bg-green-500/10 p-4">
           <div className="flex items-center gap-3">
             <Trophy className="size-6 text-green-500" />
             <div>
@@ -131,18 +136,20 @@ export function StepHousehold({ onBack }: Props) {
 
           <h3 className="mt-2 text-sm font-semibold text-foreground">2. เลือกชุดกระดาษ µPADs สำหรับทดสอบ</h3>
           <div className="grid grid-cols-2 gap-3">
-            {/* ชุด A วางซ้ายเสมอ */}
+            {/* ชุด A */}
             <button
               type="button"
-              onClick={() => setChosenSet('A')}
+              disabled={isTested}
+              onClick={() => !isTested && setChosenSet('A')}
               className={cn(
                 'flex flex-col items-center gap-2 rounded-xl border p-4 text-center transition-all',
-                chosenSet === 'A' ? 'border-red-500 bg-red-500/10 shadow-md' : 'border-border bg-card hover:border-red-500/50'
+                activeChosenSet === 'A' ? 'border-red-500 bg-red-500/10 shadow-md' : 'border-border bg-card hover:border-red-500/50',
+                isTested && 'cursor-not-allowed opacity-90'
               )}
             >
               <div className="h-10 w-8 rounded bg-[#ff1a1a] shadow" />
               <span className="text-xs font-semibold text-foreground">ชุด A (กระดาษแดง)</span>
-              {chosenSet === 'A' && (
+              {activeChosenSet === 'A' && (
                 selectedSample.correctSet === 'A' ? (
                   <span className="flex items-center gap-1 text-[11px] font-bold text-green-500"><CheckCircle2 className="size-4" /> ถูกต้อง</span>
                 ) : (
@@ -151,18 +158,20 @@ export function StepHousehold({ onBack }: Props) {
               )}
             </button>
 
-            {/* ชุด B วางขวาเสมอ */}
+            {/* ชุด B */}
             <button
               type="button"
-              onClick={() => setChosenSet('B')}
+              disabled={isTested}
+              onClick={() => !isTested && setChosenSet('B')}
               className={cn(
                 'flex flex-col items-center gap-2 rounded-xl border p-4 text-center transition-all',
-                chosenSet === 'B' ? 'border-amber-500 bg-amber-500/10 shadow-md' : 'border-border bg-card hover:border-amber-500/50'
+                activeChosenSet === 'B' ? 'border-amber-500 bg-amber-500/10 shadow-md' : 'border-border bg-card hover:border-amber-500/50',
+                isTested && 'cursor-not-allowed opacity-90'
               )}
             >
               <div className="h-10 w-8 rounded bg-[#f2c230] shadow" />
               <span className="text-xs font-semibold text-foreground">ชุด B (กระดาษเหลือง)</span>
-              {chosenSet === 'B' && (
+              {activeChosenSet === 'B' && (
                 selectedSample.correctSet === 'B' ? (
                   <span className="flex items-center gap-1 text-[11px] font-bold text-green-500"><CheckCircle2 className="size-4" /> ถูกต้อง</span>
                 ) : (
@@ -175,13 +184,13 @@ export function StepHousehold({ onBack }: Props) {
           {isCorrect && !isTested && (
             <Button size="lg" onClick={handleTest} className="mt-2 bg-green-600 text-white hover:bg-green-700">
               <Beaker aria-hidden="true" />
-              หยด{selectedSample.name} ลงบนกระดาษชุด {chosenSet}
+              หยด{selectedSample.name} ลงบนกระดาษชุด {activeChosenSet}
             </Button>
           )}
 
           {isTested && (
             <div className="mt-2 rounded-xl bg-muted/50 p-3 text-center text-xs text-muted-foreground">
-              ✅ หยดสารและบันทึกผลเรียบร้อยแล้ว สามารถเลือกสารตัวอย่างอื่นเพื่อทดสอบต่อได้เลยครับ
+              ✅ บันทึกผลเรียบร้อยแล้ว (ล็อคตัวเลือกที่ถูกต้อง) สามารถเลือกสารตัวอย่างอื่นเพื่อทดสอบต่อได้เลยครับ
             </div>
           )}
         </Panel>
@@ -191,7 +200,7 @@ export function StepHousehold({ onBack }: Props) {
 
           <div className="flex flex-wrap items-center justify-center gap-6">
             {/* ชุด A */}
-            <div className={cn('flex flex-col items-center gap-2 rounded-2xl border p-4 transition-all', chosenSet === 'A' ? 'border-primary bg-card shadow-lg' : 'border-border/50 bg-card/40 opacity-60')}>
+            <div className={cn('flex flex-col items-center gap-2 rounded-2xl border p-4 transition-all', activeChosenSet === 'A' ? 'border-primary bg-card shadow-lg' : 'border-border/50 bg-card/40 opacity-60')}>
               <span className="text-xs font-medium text-muted-foreground">ชุด A (กระดาษแดง)</span>
               <div className="relative flex h-64 w-32 items-end justify-center rounded-xl border border-border bg-[#0d1f38] p-4 shadow-inner">
                 <div
@@ -199,7 +208,7 @@ export function StepHousehold({ onBack }: Props) {
                   style={{ backgroundColor: setAInfo.paperColor }}
                 >
                   <div className="absolute bottom-1 left-1/2 size-2.5 -translate-x-1/2 rounded-full border border-white/40 bg-white/10" />
-                  {isTested && chosenSet === 'A' && (
+                  {isTested && activeChosenSet === 'A' && (
                     <div
                       className="absolute inset-x-0 bottom-0 animate-migrate"
                       style={{
@@ -212,12 +221,12 @@ export function StepHousehold({ onBack }: Props) {
                 </div>
               </div>
               <span className="font-mono text-[11px] text-muted-foreground">
-                {isTested && chosenSet === 'A' ? `${selectedSample.distance} mm` : 'รอดำเนินการ'}
+                {isTested && activeChosenSet === 'A' ? `${selectedSample.distance} mm` : 'รอดำเนินการ'}
               </span>
             </div>
 
             {/* ชุด B */}
-            <div className={cn('flex flex-col items-center gap-2 rounded-2xl border p-4 transition-all', chosenSet === 'B' ? 'border-primary bg-card shadow-lg' : 'border-border/50 bg-card/40 opacity-60')}>
+            <div className={cn('flex flex-col items-center gap-2 rounded-2xl border p-4 transition-all', activeChosenSet === 'B' ? 'border-primary bg-card shadow-lg' : 'border-border/50 bg-card/40 opacity-60')}>
               <span className="text-xs font-medium text-muted-foreground">ชุด B (กระดาษเหลือง)</span>
               <div className="relative flex h-64 w-32 items-end justify-center rounded-xl border border-border bg-[#0d1f38] p-4 shadow-inner">
                 <div
@@ -225,7 +234,7 @@ export function StepHousehold({ onBack }: Props) {
                   style={{ backgroundColor: setBInfo.paperColor }}
                 >
                   <div className="absolute bottom-1 left-1/2 size-2.5 -translate-x-1/2 rounded-full border border-white/40 bg-white/10" />
-                  {isTested && chosenSet === 'B' && (
+                  {isTested && activeChosenSet === 'B' && (
                     <div
                       className="absolute inset-x-0 bottom-0 animate-migrate"
                       style={{
@@ -238,26 +247,4 @@ export function StepHousehold({ onBack }: Props) {
                 </div>
               </div>
               <span className="font-mono text-[11px] text-muted-foreground">
-                {isTested && chosenSet === 'B' ? `${selectedSample.distance} mm` : 'รอดำเนินการ'}
-              </span>
-            </div>
-          </div>
-
-          {isTested && (
-            <Notice tone="success" className="w-full text-left">
-              <p className="flex items-center gap-1.5 font-semibold text-success-foreground">
-                <CheckCircle2 className="size-4 text-green-500" /> สรุปผลและคำอธิบายทางเคมี:
-              </p>
-              <p className="mt-1 text-xs text-success-foreground/90">{selectedSample.correctDesc}</p>
-            </Notice>
-          )}
-
-          <Button variant="outline" size="sm" onClick={onBack} className="mt-2">
-            <ArrowLeft aria-hidden="true" />
-            กลับสู่หน้าหลัก Virtual Lab
-          </Button>
-        </Panel>
-      </div>
-    </div>
-  )
-}
+                {isTested && activeChosenSet === 'B'
