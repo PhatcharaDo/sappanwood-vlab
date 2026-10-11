@@ -14,7 +14,6 @@ import { StepHousehold } from './step-household'
 import { Button } from '@/components/ui/button'
 import { Beaker, Unlock, Award, FileText, Mail, Phone, User, ArrowLeft, Printer } from 'lucide-react'
 
-// ฟังก์ชันสร้างค่าสุ่มระยะทางกลาง (เรียงลำดับจากน้อยไปมากตามความเข้มข้น)
 function generateRandomDistances() {
   const distances: number[] = []
   let current = Math.floor(Math.random() * 6) + 12
@@ -36,12 +35,8 @@ export function VirtualLab() {
   const [graphed, setGraphed] = useState(false)
   const [showHousehold, setShowHousehold] = useState(false)
   
-  // สถานะบันทึกการทดสอบสารครัวเรือน เพื่อให้คงอยู่เวลาสลับเข้า-ออก
   const [householdTestedMap, setHouseholdTestedMap] = useState<Record<string, boolean>>({})
-  // สถานะแสดงหน้าจบหลักสูตร (ใบประกาศ ใบงาน ติดต่อผู้พัฒนา)
   const [showCompletion, setShowCompletion] = useState(false)
-  
-  // สถานะสำหรับเปิด/ปิดโหมดปลดล็อกทุกขั้นตอนเพื่อการทดสอบด่วน
   const [isBypassed, setIsBypassed] = useState(false)
 
   const [randomDistances] = useState<Record<SetId, number[]>>({
@@ -49,7 +44,6 @@ export function VirtualLab() {
     B: generateRandomDistances(),
   })
 
-  // ถ้าเปิด Bypass จะถือว่าทุกขั้นตอนเสร็จสมบูรณ์แล้ว สามารถกดสลับดูได้อิสระ
   const completed = isBypassed
     ? [true, true, true, true]
     : [
@@ -58,6 +52,13 @@ export function VirtualLab() {
         tested.A.every(Boolean) && tested.B.every(Boolean),
         graphed,
       ]
+
+  // ตรวจสอบว่าทดสอบสารในครัวเรือนครบทั้ง 4 ชนิดจริงๆ แล้วหรือไม่
+  const isHouseholdFullyCompleted = 
+    householdTestedMap['vinegar'] &&
+    householdTestedMap['lime'] &&
+    householdTestedMap['baking-soda'] &&
+    householdTestedMap['soapy-water']
 
   function goTo(step: number) {
     setShowHousehold(false)
@@ -68,17 +69,18 @@ export function VirtualLab() {
 
   function handleBypassToggle() {
     if (!isBypassed) {
-      // เมื่อกดเปิด ให้ปลดล็อกสถานะทุกหน้าให้อัตโนมัติทันที
       setExtracted(true)
       setCoated({ A: true, B: true })
       setTested({ A: Array(5).fill(true), B: Array(5).fill(true) })
       setGraphed(true)
       setHouseholdTestedMap({ vinegar: true, lime: true, 'baking-soda': true, 'soapy-water': true })
+    } else {
+      // เมื่อปิด Bypass ให้รีเซ็ตค่ากลับมาเริ่มต้น
+      setHouseholdTestedMap({})
     }
     setIsBypassed((prev) => !prev)
   }
 
-  // หากอยู่ในหน้าจบหลักสูตร (แสดงใบประกาศ ใบงาน และติดต่อผู้พัฒนา)
   if (showCompletion) {
     return (
       <div className="flex min-h-dvh flex-col">
@@ -91,7 +93,6 @@ export function VirtualLab() {
             <h1 className="text-xl font-bold text-foreground">🎉 หน้าสรุปผลและจบหลักสูตร Virtual Lab</h1>
           </div>
 
-          {/* 1. ใบประกาศนียบัตร / ใบอบรม */}
           <section className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-card to-amber-500/5 p-8 text-center shadow-xl">
             <Award className="mx-auto size-16 text-amber-500 mb-3" />
             <span className="rounded-full bg-amber-500/20 px-3 py-1 text-xs font-semibold text-amber-400">Certificate of Completion</span>
@@ -108,7 +109,6 @@ export function VirtualLab() {
             </div>
           </section>
 
-          {/* 2. เอกสารใบงาน (Worksheet) */}
           <section className="rounded-2xl border border-border bg-card p-6 shadow-md">
             <div className="flex items-center gap-3 mb-4">
               <FileText className="size-6 text-primary" />
@@ -120,7 +120,6 @@ export function VirtualLab() {
             </Button>
           </section>
 
-          {/* 3. ช่องทางการติดต่อผู้พัฒนา */}
           <section className="rounded-2xl border border-border bg-card p-6 shadow-md">
             <div className="flex items-center gap-3 mb-4">
               <User className="size-6 text-primary" />
@@ -151,7 +150,6 @@ export function VirtualLab() {
     )
   }
 
-  // หากอยู่ในหน้าทดสอบสารในครัวเรือน
   if (showHousehold) {
     return (
       <div className="flex min-h-dvh flex-col">
@@ -184,7 +182,6 @@ export function VirtualLab() {
     <div className="flex min-h-dvh flex-col">
       <SiteHeader />
       <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-6 md:px-6 md:py-8">
-        {/* ปุ่มเปิด/ปิดโหมดปลดล็อกพิเศษ */}
         <div className="flex items-center justify-between">
           <div className="text-xs text-muted-foreground">
             {isBypassed && <span className="rounded bg-amber-500/20 px-2 py-1 font-semibold text-amber-400">⚡ กำลังเปิดโหมดปลดล็อกทุกขั้นตอน</span>}
@@ -239,8 +236,8 @@ export function VirtualLab() {
                   ไปสู่การทดลองพิเศษ: สารในครัวเรือน (Household Testing)
                 </Button>
 
-                {/* ปุ่มจบหลักสูตร (จะแสดงเมื่อทดสอบสารในครัวเรือนครบแล้วทั้ง 4 ตัว หรือเปิด Bypass) */}
-                {(Object.values(householdTestedMap).filter(Boolean).length === 4 || isBypassed) && (
+                {/* แสดงปุ่มเฉพาะเมื่อทดสอบสารในครัวเรือนครบทั้ง 4 ชนิดจริงๆ เท่านั้น */}
+                {isHouseholdFullyCompleted && (
                   <Button size="lg" variant="default" className="gap-2 bg-green-600 text-white hover:bg-green-700 shadow-lg animate-bounce" onClick={() => setShowCompletion(true)}>
                     <Award className="size-5" />
                     🎓 จบหลักสูตร / ดูใบประกาศนียบัตร & ใบงาน
