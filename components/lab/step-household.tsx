@@ -38,11 +38,7 @@ export function StepHousehold({ testedMap, setTestedMap, onBack }: Props) {
   const allDone = ITEMS.every((s) => testedMap[s.id] === true)
 
   const handleTestClick = () => {
-    const updated = { ...testedMap, [selected.id]: true }
-    setTestedMap(updated)
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('household_tested_map', JSON.stringify(updated))
-    }
+    setTestedMap((prev) => ({ ...prev, [selected.id]: true }))
   }
 
   return (
@@ -58,7 +54,7 @@ export function StepHousehold({ testedMap, setTestedMap, onBack }: Props) {
               <p className="text-xs text-muted-foreground">เข้าใจหลักการทำงานของกระดาษ µPADs สกัดแก่นฝางและการประยุกต์ใช้จริง</p>
             </div>
           </div>
-          {/* มีเฉพาะปุ่มกลับหน้าหลักแล็บเพียงอย่างเดียว */}
+          {/* แสดงเฉพาะปุ่มกลับหน้าหลักแล็บเท่านั้น */}
           <Button onClick={onBack} className="bg-green-600 text-white hover:bg-green-700">
             กลับสู่หน้าหลัก Virtual Lab
           </Button>
