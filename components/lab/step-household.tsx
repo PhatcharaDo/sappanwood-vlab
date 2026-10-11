@@ -1,6 +1,6 @@
 'use client'
 
-import { Beaker, CheckCircle2, Trophy, XCircle } from 'lucide-react'
+import { Beaker, CheckCircle2, Trophy, XCircle, Award } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Notice, Panel, StepHeading } from './lab-ui'
@@ -14,21 +14,37 @@ const ITEMS = [
   { id: 'soapy-water', name: 'น้ำสบู่ (Soapy water)', correctSet: 'B', desc: 'ถูกต้อง! น้ำสบู่มีฤทธิ์เป็นเบส ใช้ชุด B (กระดาษเหลือง) เปลี่ยนเป็นสีแดงสดอย่างชัดเจน', distance: 22 },
 ]
 
-export function StepHousehold({ onBack }: { onBack: () => void }) {
-  const [samples] = useState(() => [...ITEMS].sort(() => Math.random() - 0.5))
+type Props = {
+  testedMap: Record<string, boolean>
+  setTestedMap: React.Dispatch<React.SetStateAction<Record<string, boolean>>>
+  onCompleteCourse: () => void
+  onBack: () => void
+}
+
+export function StepHousehold({ testedMap, setTestedMap, onCompleteCourse, onBack }: Props) {
+  const [samples] = useState(() => [...ITEMS])
   const [selected, setSelected] = useState(samples[0])
-  const [chosenSet, setChosenSet] = useState<'A' | 'B' | null>(null)
-  const [testedMap, setTestedMap] = useState<Record<string, boolean>>({})
+  const [chosenSet, setChosenSet] = useState<'A' | 'B' | null>(() => {
+    return testedMap[samples[0].id] ? (samples[0].correctSet as 'A' | 'B') : null
+  })
 
   const handleSelect = (s: typeof samples[0]) => {
     setSelected(s)
     setChosenSet(testedMap[s.id] ? (s.correctSet as 'A' | 'B') : null)
   }
 
-  const isTested = !!testedMap[selected.id]
+  const isTested = Boolean(testedMap[selected.id])
   const activeSet = isTested ? selected.correctSet : chosenSet
   const isCorrect = activeSet === selected.correctSet
-  const allDone = samples.every((s) => testedMap[s.id])
+  const allDone = samples.every((s) => Boolean(testedMap[s.id]))
+
+  const handleTestClick = () => {
+    const updated = { ...testedMap, [selected.id]: true }
+    setTestedMap(updated)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('household_tested_map', JSON.stringify(updated))
+    }
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -43,7 +59,12 @@ export function StepHousehold({ onBack }: { onBack: () => void }) {
               <p className="text-xs text-muted-foreground">เข้าใจหลักการทำงานของกระดาษ µPADs สกัดแก่นฝางและการประยุกต์ใช้จริง</p>
             </div>
           </div>
-          <Button onClick={onBack} className="bg-green-600 text-white hover:bg-green-700">กลับสู่หน้าหลัก Virtual Lab</Button>
+          <div className="flex gap-2">
+            <Button onClick={onCompleteCourse} className="bg-green-600 text-white hover:bg-green-700 gap-2">
+              <Award className="size-4" /> ไปหน้าจบหลักสูตร & ใบประกาศ
+            </Button>
+            <Button variant="outline" onClick={onBack}>กลับหน้าหลักแล็บ</Button>
+          </div>
         </Notice>
       )}
 
@@ -52,7 +73,7 @@ export function StepHousehold({ onBack }: { onBack: () => void }) {
           <h3 className="text-sm font-semibold text-foreground">1. เลือกสารตัวอย่างจากครัวเรือน</h3>
           <div className="grid grid-cols-1 gap-2">
             {samples.map((s) => {
-              const done = testedMap[s.id]
+              const done = Boolean(testedMap[s.id])
               return (
                 <button key={s.id} type="button" onClick={() => handleSelect(s)} className={cn('flex items-center justify-between rounded-xl border p-3.5 text-left transition-colors', selected.id === s.id ? 'border-primary bg-primary/10' : 'border-border bg-card hover:border-primary/60')}>
                   <div className="flex items-center gap-2.5">
@@ -81,12 +102,12 @@ export function StepHousehold({ onBack }: { onBack: () => void }) {
           </div>
 
           {isCorrect && !isTested && (
-            <Button size="lg" onClick={() => setTestedMap((prev) => ({ ...prev, [selected.id]: true }))} className="mt-2 bg-green-600 text-white hover:bg-green-700">
+            <Button size="lg" onClick={handleTestClick} className="mt-2 bg-green-600 text-white hover:bg-green-700">
               <Beaker aria-hidden="true" /> หยด{selected.name} ลงบนกระดาษชุด {activeSet}
             </Button>
           )}
 
-          {isTested && <div className="mt-2 rounded-xl bg-muted/50 p-3 text-center text-xs text-muted-foreground">✅ บันทึกผลเรียบร้อยแล้ว (ล็อคตัวเลือกที่ถูกต้อง) สามารถเลือกสารตัวอื่นต่อได้เลย</div>}
+          {isTested && <div className="mt-2 rounded-xl bg-muted/50 p-3 text-center text-xs text-muted-foreground">✅ บันทึกผลและล็อคผลลัพธ์เรียบร้อยแล้ว</div>}
         </Panel>
 
         <Panel className="flex flex-col items-center justify-center gap-4 text-center">
@@ -126,6 +147,10 @@ export function StepHousehold({ onBack }: { onBack: () => void }) {
               <p className="mt-1 text-xs text-success-foreground/90">{selected.desc}</p>
             </Notice>
           )}
+
+          <Button variant="outline" size="sm" onClick={onBack} className="mt-2">
+            ← กลับสู่หน้าหลัก Virtual Lab
+          </Button>
         </Panel>
       </div>
     </div>
