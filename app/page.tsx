@@ -15,7 +15,7 @@ export default function LandingPage() {
         <div className="flex flex-col items-center space-y-4">
           <div className="flex size-20 items-center justify-center rounded-full border-2 border-primary bg-background shadow-[0_0_10px_rgba(250,204,21,0.4)] overflow-hidden p-2">
             <img
-              src="/school.logo.png"
+              src="/school-logo.png"
               alt="ตราโรงเรียนหาดใหญ่วิทยาลัยสมบูรณ์กุลกัญญา"
               className="h-full w-full object-contain"
             />
@@ -34,20 +34,28 @@ export default function LandingPage() {
         <div className="flex flex-wrap items-center justify-center gap-3">
           <button
             onClick={() => setActiveModal('green')}
-            className="group flex items-center gap-2 rounded-full border border-success/40 bg-success/10 px-5 py-2.5 text-sm font-medium text-success transition-all hover:bg-success/20 hover:scale-105 active:scale-95 cursor-pointer shadow-sm"
+            className="group flex flex-col items-center justify-center rounded-full border border-success/40 bg-success/10 px-5 py-2 text-xs font-medium text-success transition-all hover:bg-success/20 hover:scale-105 active:scale-95 cursor-pointer shadow-sm"
           >
-            <Leaf className="size-4" aria-hidden="true" />
-            Green Chemistry (12 หลักการ)
-            <span className="text-xs text-success/80 underline underline-offset-2 font-normal">(คลิกอ่าน)</span>
+            <span className="inline-flex items-center gap-1.5">
+              <Leaf className="size-3.5" aria-hidden="true" />
+              Green Chemistry
+            </span>
+            <span className="text-[10px] text-success/80 underline underline-offset-2 font-normal group-hover:text-success">
+              (คลิกอ่าน)
+            </span>
           </button>
           
           <button
             onClick={() => setActiveModal('micro')}
-            className="group flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-5 py-2.5 text-sm font-medium text-primary transition-all hover:bg-primary/20 hover:scale-105 active:scale-95 cursor-pointer shadow-sm"
+            className="group flex flex-col items-center justify-center rounded-full border border-primary/40 bg-primary/10 px-5 py-2 text-xs font-medium text-primary transition-all hover:bg-primary/20 hover:scale-105 active:scale-95 cursor-pointer shadow-sm"
           >
-            <FlaskConical className="size-4" aria-hidden="true" />
-            Microscale Chemistry (เคมีแบบย่อส่วน)
-            <span className="text-xs text-primary/80 underline underline-offset-2 font-normal">(คลิกอ่าน)</span>
+            <span className="inline-flex items-center gap-1.5">
+              <FlaskConical className="size-3.5" aria-hidden="true" />
+              Microscale Chemistry
+            </span>
+            <span className="text-[10px] text-primary/80 underline underline-offset-2 font-normal group-hover:text-primary">
+              (คลิกอ่าน)
+            </span>
           </button>
         </div>
 
@@ -74,7 +82,7 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* ปุ่มกดเข้าห้องปฏิบัติการ (สีเหลืองตามภาพ) */}
+        {/* ปุ่มกดเข้าห้องปฏิบัติการ */}
         <div className="pt-2">
           <Link
             href="/lab"
