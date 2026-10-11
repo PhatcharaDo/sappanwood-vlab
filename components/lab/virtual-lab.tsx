@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import type { SetId } from '@/lib/lab'
+import { CONCENTRATIONS, type SetId } from '@/lib/lab'
 import { cn } from '@/lib/utils'
 import { SiteFooter } from './site-footer'
 import { SiteHeader } from './site-header'
@@ -10,6 +10,17 @@ import { StepExtraction } from './step-extraction'
 import { StepMeasurement } from './step-measurement'
 import { StepNav } from './step-nav'
 import { StepTesting } from './step-testing'
+
+// ฟังก์ชันสร้างค่าสุ่มระยะทางกลาง (เรียงลำดับจากน้อยไปมากตามความเข้มข้น)
+function generateRandomDistances() {
+  const distances: number[] = []
+  let current = Math.floor(Math.random() * 6) + 12 // เริ่มต้นประมาณ 12-17 mm
+  for (let i = 0; i < CONCENTRATIONS.length; i++) {
+    distances.push(current)
+    current += Math.floor(Math.random() * 5) + 8 // เว้นระยะ 8-12 mm
+  }
+  return distances
+}
 
 export function VirtualLab() {
   const [active, setActive] = useState(1)
@@ -20,6 +31,12 @@ export function VirtualLab() {
     B: Array(5).fill(false),
   })
   const [graphed, setGraphed] = useState(false)
+
+  // เก็บค่าระยะทางสุ่มกลางสำหรับ Set A และ Set B
+  const [randomDistances] = useState<Record<SetId, number[]>>({
+    A: generateRandomDistances(),
+    B: generateRandomDistances(),
+  })
 
   const completed = [
     extracted,
@@ -55,6 +72,7 @@ export function VirtualLab() {
           <section className={cn(active !== 3 && 'hidden')} aria-label="ขั้นตอนที่ 3">
             <StepTesting
               tested={tested}
+              distances={randomDistances}
               onTest={(set, index) =>
                 setTested((prev) => ({ ...prev, [set]: prev[set].map((v, i) => (i === index ? true : v)) }))
               }
@@ -64,7 +82,7 @@ export function VirtualLab() {
         )}
         {completed[2] && (
           <section className={cn(active !== 4 && 'hidden')} aria-label="ขั้นตอนที่ 4">
-            <StepMeasurement onComplete={() => setGraphed(true)} />
+            <StepMeasurement distances={randomDistances} onComplete={() => setGraphed(true)} />
           </section>
         )}
       </main>
