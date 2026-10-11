@@ -122,8 +122,8 @@ export function StepMeasurement({ distances, onComplete }: Props) {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)]">
         <Panel className="flex flex-col gap-4">
           <h3 className="text-sm font-semibold text-foreground">ตารางบันทึกผลการทดลอง</h3>
-          <div className="overflow-x-auto pb-2">
-            <table className="w-full min-w-[500px] border-separate border-spacing-0 text-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full border-separate border-spacing-0 text-sm">
               <caption className="sr-only">ระยะทางการเคลื่อนที่ (mm) ของสารแต่ละความเข้มข้นบนกระดาษ Set A และ Set B</caption>
               <thead>
                 <tr>
