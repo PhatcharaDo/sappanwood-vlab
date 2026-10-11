@@ -12,7 +12,7 @@ export default function LandingPage() {
         <div className="flex flex-col items-center space-y-4">
           <div className="flex size-20 items-center justify-center rounded-full border-2 border-primary bg-background shadow-[0_0_10px_rgba(250,204,21,0.4)] overflow-hidden p-2">
             <img
-              src="/school-logo.png"
+              src="/school.logo.png"
               alt="ตราโรงเรียนหาดใหญ่วิทยาลัยสมบูรณ์กุลกัญญา"
               className="h-full w-full object-contain"
             />
