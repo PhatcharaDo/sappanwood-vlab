@@ -17,7 +17,7 @@ export function SiteHeader() {
               className="flex size-14 shrink-0 items-center justify-center rounded-full border-2 border-primary bg-background shadow-[0_0_4px_rgba(250,204,21,0.3)] overflow-hidden p-1.5"
             >
               <img
-                src="/school.logo.png"
+                src="/school-logo.png"
                 alt="ตราโรงเรียนหาดใหญ่วิทยาลัยสมบูรณ์กุลกัญญา"
                 className="h-full w-full object-contain"
               />
@@ -162,4 +162,69 @@ export function SiteHeader() {
 
       {/* Modal: Microscale Chemistry */}
       {activeModal === 'micro' && (
-        <div className="fixed inset-
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 sm:p-5 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-xl max-h-[85vh] flex flex-col rounded-2xl border border-primary/40 bg-slate-950 shadow-2xl text-slate-100 overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800 bg-slate-900/80">
+              <div className="flex items-center gap-3 text-primary">
+                <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/30 shrink-0">
+                  <FlaskConical className="size-6" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-xl font-bold text-white">Microscale Chemistry (เคมีแบบย่อส่วน)</h3>
+                  <p className="text-xs sm:text-sm text-primary/90 font-medium">หลักการ แนวคิด และประโยชน์ของการย่อขนาดห้องปฏิบัติการ</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setActiveModal(null)}
+                className="rounded-full p-2 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+              >
+                <X className="size-6" />
+              </button>
+            </div>
+
+            {/* Content Body */}
+            <div className="p-4 sm:p-6 overflow-y-auto space-y-4 text-sm sm:text-base text-slate-200 leading-relaxed">
+              <p className="text-sm sm:text-base font-normal text-slate-200 leading-relaxed bg-slate-900/60 p-3.5 rounded-xl border border-slate-800">
+                <strong className="text-primary font-semibold">เคมีแบบย่อส่วน (Microscale Chemistry)</strong> คือแนวคิดและเทคนิคในการทำปฏิบัติการทางเคมีโดยลดขนาดปริมาณสารเคมี อุปกรณ์ และเครื่องมือลงให้เหลือน้อยที่สุด (ระดับมิลลิลิตร หยด หรือไมโครลิตร) โดยยังคงให้ผลการทดลองที่ถูกต้องแม่นยำ
+              </p>
+
+              <div className="space-y-3.5">
+                <div className="rounded-xl bg-slate-900/90 p-4 sm:p-5 border border-slate-800 space-y-3">
+                  <h4 className="font-bold text-primary text-sm sm:text-base flex items-center gap-2">
+                    <CheckCircle2 className="size-5 text-primary shrink-0" />
+                    วัตถุประสงค์และจุดเด่นทั่วไปของเคมีแบบย่อส่วน
+                  </h4>
+                  <ul className="space-y-2.5 text-xs sm:text-sm text-slate-300 pl-5 list-disc leading-relaxed">
+                    <li>
+                      <strong className="text-white">ความปลอดภัยสูงสุด (Enhanced Safety):</strong> ลดความเสี่ยงจากอุบัติเหตุ การระเบิด หรือไอระเหยอันตราย เนื่องจากใช้สารเคมีปริมาณน้อยมาก
+                    </li>
+                    <li>
+                      <strong className="text-white">ลดการเกิดของเสีย (Waste Minimization):</strong> ลดปริมาณขยะเคมีที่ปล่อยสู่สิ่งแวดล้อมได้อย่างมหาศาล ง่ายต่อการบำบัด
+                    </li>
+                    <li>
+                      <strong className="text-white">ประหยัดงบประมาณ (Cost Efficiency):</strong> ลดต้นทุนค่าสารเคมีราคาสูงและเครื่องแก้วขนาดใหญ่
+                    </li>
+                    <li>
+                      <strong className="text-white">เพิ่มความคล่องตัว (Portability):</strong> อุปกรณ์มีขนาดเล็ก น้ำหนักเบา สามารถนำไปจัดกิจกรรมนอกสถานที่หรือภาคสนามได้สะดวก
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="rounded-xl bg-slate-900/90 p-4 sm:p-5 border border-slate-800 space-y-2">
+                  <h4 className="font-bold text-primary text-sm sm:text-base flex items-center gap-2">
+                    <CheckCircle2 className="size-5 text-primary shrink-0" />
+                    การประยุกต์ใช้ในระดับสากลและการศึกษา
+                  </h4>
+                  <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                    ได้รับการยอมรับและส่งเสริมจากองค์กรการศึกษานานาชาติ (เช่น UNESCO และ IUPAC) เพื่อใช้ในการเรียนการสอนวิชาเคมี ช่วยให้นักเรียนฝึกฝนทักษะกระบวนการทางวิทยาศาสตร์ได้อย่างปลอดภัย สัมผัสประสบการณ์จริงได้ทั่วถึง และเป็นมิตรต่อสิ่งแวดล้อม
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
