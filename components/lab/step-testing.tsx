@@ -12,11 +12,12 @@ const WARNING = 'ทำไม่ได้! ต้องเปลี่ยนค�
 
 type Props = {
   tested: Record<SetId, boolean[]>
+  distances: Record<SetId, number[]>
   onTest: (set: SetId, index: number) => void
   onNext: () => void
 }
 
-export function StepTesting({ tested, onTest, onNext }: Props) {
+export function StepTesting({ tested, distances, onTest, onNext }: Props) {
   const [activeSet, setActiveSet] = useState<SetId>('A')
   const [selected, setSelected] = useState<Record<SetId, number | null>>({ A: null, B: null })
   const [warning, setWarning] = useState<string | null>(null)
@@ -183,6 +184,7 @@ export function StepTesting({ tested, onTest, onNext }: Props) {
             key={activeSet}
             set={activeSet}
             tested={setTested}
+            distances={distances[activeSet]}
             animateIndex={animateIndex[activeSet]}
             selectedIndex={selectedIndex}
             onStripClick={handleStripClick}
