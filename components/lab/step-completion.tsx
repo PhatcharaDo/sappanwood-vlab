@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Award, FileText, Mail, Phone, User, ArrowLeft, CheckCircle2 } from 'lucide-react'
 
@@ -15,21 +15,6 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
   })
   const [isSubmitted, setIsSubmitted] = useState(false)
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem('lab_certificate_data')
-        if (saved) {
-          const parsed = JSON.parse(saved)
-          setFormData(parsed)
-          setIsSubmitted(true)
-        }
-      } catch (e) {
-        console.error(e)
-      }
-    }
-  }, [])
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
@@ -38,9 +23,6 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
     e.preventDefault()
     if (formData.name.trim() && formData.school.trim()) {
       setIsSubmitted(true)
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('lab_certificate_data', JSON.stringify(formData))
-      }
     }
   }
 
@@ -62,7 +44,7 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
               <h3 className="text-lg font-semibold text-foreground">กรอกข้อมูลเพื่อรับเกียรติบัตรผ่านการอบรม</h3>
             </div>
             <p className="mb-6 text-sm text-muted-foreground">
-              กรุณากรอกชื่อ-นามสกุล และชื่อสถานศึกษาของท่านให้ถูกต้อง เพื่อแสดงลงบนเกียรติบัตร (ข้อมูลจะถูกบันทึกและล็อคไว้หลังกดยืนยัน)
+              กรุณากรอกชื่อ-นามสกุล และชื่อสถานศึกษาของท่านให้ถูกต้อง เพื่อแสดงลงบนเกียรติบัตร
             </p>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
