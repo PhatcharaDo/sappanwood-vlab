@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { Award, FileText, Mail, Phone, User, ArrowLeft, CheckCircle2, Facebook, Instagram } from 'lucide-react'
+import { Award, FileText, Mail, Phone, User, ArrowLeft, CheckCircle2, Facebook } from 'lucide-react'
 
 type StepCompletionProps = {
   onBack: () => void
@@ -123,7 +123,7 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
           </section>
         )}
 
-        {/* ส่วนที่ 3: เอกสารใบงาน (Worksheet) - รองรับลิงก์ไฟล์ PDF */}
+        {/* ส่วนที่ 3: เอกสารใบงาน (Worksheet) */}
         <section className="rounded-2xl border border-border bg-card p-6 shadow-md">
           <div className="mb-4 flex items-center gap-3">
             <FileText className="size-6 text-primary" />
@@ -131,7 +131,6 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
           </div>
           <p className="mb-4 text-sm text-muted-foreground">ดาวน์โหลดสรุปผลการทดลอง ระยะการเคลื่อนที่ และกราฟความเข้มข้นเพื่อใช้ประกอบรายงาน</p>
           
-          {/* วิธีใส่ไฟล์ PDF: นำไฟล์ .pdf ไปไว้ในโฟลเดอร์ public ของโปรเจกต์ แล้วเปลี่ยนชื่อไฟล์ตรง href ด้านล่างนี้ */}
           <a
             href="/worksheet.pdf"
             target="_blank"
@@ -144,40 +143,6 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
           </a>
         </section>
 
-        {/* ส่วนที่ 4: ข้อมูลผู้พัฒนา พร้อมช่องทาง Facebook และ Instagram */}
+        {/* ส่วนที่ 4: ข้อมูลผู้พัฒนา */}
         <section className="rounded-2xl border border-border bg-card p-6 shadow-md">
           <div className="mb-4 flex items-center gap-3">
-            <User className="size-6 text-primary" />
-            <h3 className="text-lg font-semibold text-foreground">ข้อมูลผู้พัฒนาโครงการ (Developer Contacts)</h3>
-          </div>
-          <div className="grid gap-3 text-sm text-muted-foreground md:grid-cols-2">
-            <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-muted/30 p-3">
-              <User className="size-4 text-primary" />
-              <span>ผู้พัฒนา: พชร ดวงอุปะ (James) - ม.6/2</span>
-            </div>
-            <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-muted/30 p-3">
-              <span className="text-xs font-semibold text-primary">โรงเรียน:</span>
-              <span>หาดใหญ่วิทยาลัยสมบูรณ์กุลกัญญา (Hatyaiwittayalaisomboonkulkanya School)</span>
-            </div>
-            <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-muted/30 p-3">
-              <Mail className="size-4 text-primary" />
-              <span>อีเมลติดต่อ: phatchara@example.com</span>
-            </div>
-            <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-muted/30 p-3">
-              <Phone className="size-4 text-primary" />
-              <span>โทรศัพท์: 08x-xxx-xxxx</span>
-            </div>
-            <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-muted/30 p-3">
-              <Facebook className="size-4 text-primary" />
-              <span>Facebook: Phatchara Dounguapa</span>
-            </div>
-            <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-muted/30 p-3">
-              <Instagram className="size-4 text-primary" />
-              <span>Instagram: @james_phatchara</span>
-            </div>
-          </div>
-        </section>
-      </main>
-    </div>
-  )
-}
