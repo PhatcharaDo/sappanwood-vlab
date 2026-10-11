@@ -90,7 +90,7 @@ export function VirtualLab() {
     if (!isBypassed) {
       setExtracted(true)
       setCoated({ A: true, B: true })
-      setTested({ A: Array(5).fill(true), B: Array(5).fill(true) }) // แก้ไขวงเล็บให้ครบถ้วนที่นี่
+      setTested({ A: Array(5).fill(true), B: Array(5).fill(true) })
       setGraphed(true)
       const fullMap = { vinegar: true, lime: true, 'baking-soda': true, 'soapy-water': true }
       setHouseholdTestedMap(fullMap)
@@ -224,4 +224,51 @@ export function VirtualLab() {
           <StepExtraction done={extracted} onComplete={() => setExtracted(true)} onNext={() => goTo(2)} />
         </section>
         {(completed[0] || isBypassed) && (
-          <section
+          <section className={cn(active !== 2 && 'hidden')} aria-label="ขั้นตอนที่ 2">
+            <StepCoating
+              done={coated}
+              onSetComplete={(set) => setCoated((prev) => ({ ...prev, [set]: true }))}
+              onNext={() => goTo(3)}
+            />
+          </section>
+        )}
+        {(completed[1] || isBypassed) && (
+          <section className={cn(active !== 3 && 'hidden')} aria-label="ขั้นตอนที่ 3">
+            <StepTesting
+              tested={tested}
+              distances={randomDistances}
+              onTest={(set, index) =>
+                setTested((prev) => ({ ...prev, [set]: prev[set].map((v, i) => (i === index ? true : v)) }))
+              }
+              onNext={() => goTo(4)}
+            />
+          </section>
+        )}
+        {(completed[2] || isBypassed) && (
+          <section className={cn(active !== 4 && 'hidden')} aria-label="ขั้นตอนที่ 4">
+            <StepMeasurement
+              distances={randomDistances}
+              onComplete={() => setGraphed(true)}
+            />
+            {(graphed || isBypassed) && (
+              <div className="mt-6 flex flex-col items-center gap-3">
+                <Button size="lg" className="gap-2 bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-lg hover:from-orange-700 hover:to-amber-700" onClick={() => setShowHousehold(true)}>
+                  <Beaker className="size-5" />
+                  ไปสู่การทดลองพิเศษ: สารในครัวเรือน (Household Testing)
+                </Button>
+
+                {(isHouseholdFullyCompleted || isBypassed) && (
+                  <Button size="lg" variant="default" className="gap-2 bg-green-600 text-white hover:bg-green-700 shadow-lg animate-bounce" onClick={() => setShowCompletion(true)}>
+                    <Award className="size-5" />
+                    🎓 จบหลักสูตร / ดูใบประกาศนียบัตร & ใบงาน
+                  </Button>
+                )}
+              </div>
+            )}
+          </section>
+        )}
+      </main>
+      <SiteFooter />
+    </div>
+  )
+}
