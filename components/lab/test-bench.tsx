@@ -67,11 +67,11 @@ export function TestBench({ set, tested, distances, animateIndex = null, onStrip
   }
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-border bg-[#0d1f38] pb-2">
+    <div className="w-full overflow-x-auto rounded-xl border border-border bg-[#0d1f38] pb-3 [-webkit-overflow-scrolling:touch]">
       <div
         ref={benchRef}
-        className="relative mx-auto touch-none select-none"
-        style={{ width: BENCH_W, height: BENCH_H, minWidth: BENCH_W }}
+        className="relative touch-none select-none"
+        style={{ width: `${BENCH_W}px`, minWidth: `${BENCH_W}px`, height: BENCH_H }}
         onPointerMove={handleBenchMove}
         onPointerLeave={() => setCursorMm(null)}
       >
