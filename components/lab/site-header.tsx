@@ -17,7 +17,7 @@ export function SiteHeader() {
               className="flex size-14 shrink-0 items-center justify-center rounded-full border-2 border-primary bg-background shadow-[0_0_4px_rgba(250,204,21,0.3)] overflow-hidden p-1.5"
             >
               <img
-                src="/school-logo.png"
+                src="/school.logo.png"
                 alt="ตราโรงเรียนหาดใหญ่วิทยาลัยสมบูรณ์กุลกัญญา"
                 className="h-full w-full object-contain"
               />
