@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Award, FileText, Mail, Phone, User, ArrowLeft, CheckCircle2 } from 'lucide-react'
 
@@ -15,6 +15,24 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
   })
   const [isSubmitted, setIsSubmitted] = useState(false)
 
+  // ตรวจสอบและดึงข้อมูลที่เคยบันทึกไว้ใน localStorage เพื่อล็อคสถานะไว้ตลอด
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('lab_certificate_data')
+        if (saved) {
+          const parsed = JSON.parse(saved)
+          if (parsed.name && parsed.school) {
+            setFormData(parsed)
+            setIsSubmitted(true)
+          }
+        }
+      } catch (e) {
+        console.error(e)
+      }
+    }
+  }, [])
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
@@ -23,6 +41,9 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
     e.preventDefault()
     if (formData.name.trim() && formData.school.trim()) {
       setIsSubmitted(true)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('lab_certificate_data', JSON.stringify(formData))
+      }
     }
   }
 
@@ -36,7 +57,7 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
           <h1 className="text-xl font-bold text-foreground">🎉 หน้าสรุปผลและจบหลักสูตร Virtual Lab</h1>
         </div>
 
-        {/* ฟอร์มกรอกข้อมูล / เกียรติบัตร */}
+        {/* ฟอร์มกรอกข้อมูล / เกียรติบัตร (หากยังไม่เคยส่งจะแสดงฟอร์ม หากส่งแล้วจะล็อคแสดงเกียรติบัตรยาวๆ) */}
         {!isSubmitted ? (
           <section className="rounded-2xl border border-border bg-card p-6 shadow-md">
             <div className="mb-4 flex items-center gap-3">
@@ -44,7 +65,7 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
               <h3 className="text-lg font-semibold text-foreground">กรอกข้อมูลเพื่อรับเกียรติบัตรผ่านการอบรม</h3>
             </div>
             <p className="mb-6 text-sm text-muted-foreground">
-              กรุณากรอกชื่อ-นามสกุล และชื่อสถานศึกษาของท่านให้ถูกต้อง เพื่อแสดงลงบนเกียรติบัตร
+              กรุณากรอกชื่อ-นามสกุล และชื่อสถานศึกษาของท่านให้ถูกต้อง เพื่อแสดงลงบนเกียรติบัตร (เมื่อยืนยันแล้วข้อมูลจะถูกล็อคไว้ถาวร)
             </p>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
