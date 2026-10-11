@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { Award, FileText, Mail, Phone, User, ArrowLeft, CheckCircle2, Facebook } from 'lucide-react'
+import { Award, FileText, Mail, Phone, User, ArrowLeft, CheckCircle2 } from 'lucide-react'
 
 type StepCompletionProps = {
   onBack: () => void
@@ -167,7 +167,9 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
               <span>โทรศัพท์: 08x-xxx-xxxx</span>
             </div>
             <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-muted/30 p-3">
-              <Facebook className="size-4 text-primary" />
+              <svg className="size-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+              </svg>
               <span>Facebook: Phatchara Dounguapa</span>
             </div>
             <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-muted/30 p-3">
