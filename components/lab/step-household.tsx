@@ -166,4 +166,67 @@ export function StepHousehold({ onBack }: Props) {
               <div className="relative flex h-64 w-32 items-end justify-center rounded-xl border border-border bg-[#0d1f38] p-4 shadow-inner">
                 <div
                   className="relative aspect-[3/4] w-24 rounded-md shadow-lg"
-                  style={{ backgroundColor: setAInfo
+                  style={{ backgroundColor: setAInfo.paperColor }}
+                >
+                  <div className="absolute bottom-1 left-1/2 size-2.5 -translate-x-1/2 rounded-full border border-white/40 bg-white/10" />
+                  {tested && chosenSet === 'A' && (
+                    <div
+                      className="absolute inset-x-0 bottom-0 animate-migrate"
+                      style={{
+                        height: `${selectedSample.distance * 3}px`,
+                        background: `linear-gradient(to top, ${setAInfo.reactedColor} 0%, ${setAInfo.reactedColor} 88%, ${mixHex(setAInfo.reactedColor, setAInfo.paperColor, 0.5)} 100%)`,
+                        borderRadius: '2px 2px 0 0'
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
+              <span className="font-mono text-[11px] text-muted-foreground">
+                {tested && chosenSet === 'A' ? `${selectedSample.distance} mm` : 'รอดำเนินการ'}
+              </span>
+            </div>
+
+            <div className={cn('flex flex-col items-center gap-2 rounded-2xl border p-4 transition-all', chosenSet === 'B' ? 'border-primary bg-card shadow-lg' : 'border-border/50 bg-card/40 opacity-60')}>
+              <span className="text-xs font-medium text-muted-foreground">ชุด B (กระดาษเหลือง)</span>
+              <div className="relative flex h-64 w-32 items-end justify-center rounded-xl border border-border bg-[#0d1f38] p-4 shadow-inner">
+                <div
+                  className="relative aspect-[3/4] w-24 rounded-md shadow-lg"
+                  style={{ backgroundColor: setBInfo.paperColor }}
+                >
+                  <div className="absolute bottom-1 left-1/2 size-2.5 -translate-x-1/2 rounded-full border border-white/40 bg-white/10" />
+                  {tested && chosenSet === 'B' && (
+                    <div
+                      className="absolute inset-x-0 bottom-0 animate-migrate"
+                      style={{
+                        height: `${selectedSample.distance * 3}px`,
+                        background: `linear-gradient(to top, ${setBInfo.reactedColor} 0%, ${setBInfo.reactedColor} 88%, ${mixHex(setBInfo.reactedColor, setBInfo.paperColor, 0.5)} 100%)`,
+                        borderRadius: '2px 2px 0 0'
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
+              <span className="font-mono text-[11px] text-muted-foreground">
+                {tested && chosenSet === 'B' ? `${selectedSample.distance} mm` : 'รอดำเนินการ'}
+              </span>
+            </div>
+          </div>
+
+          {tested && (
+            <Notice tone="success" className="w-full text-left">
+              <p className="flex items-center gap-1.5 font-semibold text-success-foreground">
+                <CheckCircle2 className="size-4 text-green-500" /> สรุปผลและคำอธิบายทางเคมี:
+              </p>
+              <p className="mt-1 text-xs text-success-foreground/90">{selectedSample.correctDesc}</p>
+            </Notice>
+          )}
+
+          <Button variant="outline" size="sm" onClick={onBack} className="mt-2">
+            <ArrowLeft aria-hidden="true" />
+            กลับสู่หน้าหลัก Virtual Lab
+          </Button>
+        </Panel>
+      </div>
+    </div>
+  )
+}
