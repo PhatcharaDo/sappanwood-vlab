@@ -1,20 +1,35 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { Award, FileText, Mail, Phone, User, ArrowLeft, Printer, CheckCircle2 } from 'lucide-react'
+import { Award, FileText, Mail, Phone, User, ArrowLeft, CheckCircle2 } from 'lucide-react'
 
 type StepCompletionProps = {
   onBack: () => void
 }
 
 export function StepCompletion({ onBack }: StepCompletionProps) {
-  // สถานะเก็บข้อมูลที่ผู้ใช้กรอกสำหรับเกียรติบัตร
   const [formData, setFormData] = useState({
     name: '',
     school: '',
   })
   const [isSubmitted, setIsSubmitted] = useState(false)
+
+  // โหลดข้อมูลจาก localStorage เพื่อล็อคชื่อไว้ไม่ให้ผู้อื่นเปลี่ยนซ้ำซ้อน
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('lab_certificate_data')
+        if (saved) {
+          const parsed = JSON.parse(saved)
+          setFormData(parsed)
+          setIsSubmitted(true)
+        }
+      } catch (e) {
+        console.error(e)
+      }
+    }
+  }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -24,6 +39,9 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
     e.preventDefault()
     if (formData.name.trim() && formData.school.trim()) {
       setIsSubmitted(true)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('lab_certificate_data', JSON.stringify(formData))
+      }
     }
   }
 
@@ -37,7 +55,7 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
           <h1 className="text-xl font-bold text-foreground">🎉 หน้าสรุปผลและจบหลักสูตร Virtual Lab</h1>
         </div>
 
-        {/* ส่วนที่ 1: ฟอร์มกรอกข้อมูลเพื่อรับเกียรติบัตร (แสดงเฉพาะตอนยังไม่กดล็อกข้อมูล) */}
+        {/* ฟอร์มกรอกข้อมูล / เกียรติบัตร */}
         {!isSubmitted ? (
           <section className="rounded-2xl border border-border bg-card p-6 shadow-md">
             <div className="mb-4 flex items-center gap-3">
@@ -45,7 +63,7 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
               <h3 className="text-lg font-semibold text-foreground">กรอกข้อมูลเพื่อรับเกียรติบัตรผ่านการอบรม</h3>
             </div>
             <p className="mb-6 text-sm text-muted-foreground">
-              กรุณากรอกชื่อ-นามสกุล และชื่อสถานศึกษาของท่านให้ถูกต้อง เพื่อแสดงลงบนเกียรติบัตรอิเล็กทรอนิกส์
+              กรุณากรอกชื่อ-นามสกุล และชื่อสถานศึกษาของท่านให้ถูกต้อง เพื่อแสดงลงบนเกียรติบัตร (ข้อมูลจะถูกบันทึกและล็อคไว้หลังกดยืนยัน)
             </p>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -78,9 +96,8 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
             </form>
           </section>
         ) : (
-          /* ส่วนที่ 2: ดีไซน์เกียรติบัตร (Certificate) แบบเป็นทางการ */
+          /* ดีไซน์เกียรติบัตร (Certificate) ล็อคข้อมูลแล้ว ไม่มีปุ่มพิมพ์และปุ่มแก้ไข */
           <section className="relative overflow-hidden rounded-2xl border-4 border-amber-500/40 bg-card p-8 text-center shadow-2xl md:p-12">
-            {/* ตราสัญลักษณ์หรือขอบตกแต่งเกียรติบัตร */}
             <div className="absolute right-4 top-4 rounded-full bg-amber-500/10 p-3">
               <Award className="size-10 text-amber-500" />
             </div>
@@ -98,22 +115,12 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
             </div>
 
             <p className="mx-auto max-w-xl text-sm text-muted-foreground md:text-base">
-              ได้ผ่านการทดลองและปฏิบัติการเสมือนจริง (Virtual Lab) เรื่อง <strong className="text-foreground">µPADs สกัดแก่นฝางและการทดสอบสาร</strong> สำเร็จลุล่วงตามหลักสูตร
+              ได้ผ่านการทดลองและปฏิบัติการเสมือนจริง (Virtual Lab) เรื่อง <strong className="text-foreground">ชุดกระดาษทดสอบจำแนกความเข้มข้นของสารด้วยระยะทางการเคลื่อนที่บนกระดาษจากสารสกัดแก่นฝาง</strong> สำเร็จลุล่วงตามหลักสูตร
             </p>
 
             <div className="my-6 inline-block rounded-xl border border-amber-500/30 bg-amber-500/5 px-6 py-3">
               <p className="text-xs font-semibold text-amber-600 dark:text-amber-400">สถาบัน / โครงการพัฒนา:</p>
               <p className="text-sm font-bold text-foreground">{formData.school}</p>
-              <p className="mt-1 text-[11px] text-muted-foreground">รางวัล DOW-CST Award ประจำปี พ.ศ. 2569</p>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
-              <Button onClick={() => window.print()} className="bg-amber-600 hover:bg-amber-700 text-white gap-2">
-                <Printer className="size-4" /> พิมพ์ / บันทึกเกียรติบัตร (PDF)
-              </Button>
-              <Button variant="outline" onClick={() => setIsSubmitted(false)} size="sm">
-                แก้ไขชื่อ / โรงเรียน
-              </Button>
             </div>
           </section>
         )}
