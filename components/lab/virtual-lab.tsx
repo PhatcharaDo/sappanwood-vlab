@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { CONCENTRATIONS, type SetId } from '@/lib/lab'
 import { cn } from '@/lib/utils'
 import { SiteFooter } from './site-footer'
@@ -26,24 +26,125 @@ function generateRandomDistances() {
 }
 
 export function VirtualLab() {
-  const [active, setActive] = useState(1)
-  const [extracted, setExtracted] = useState(false)
-  const [coated, setCoated] = useState<Record<SetId, boolean>>({ A: false, B: false })
-  const [tested, setTested] = useState<Record<SetId, boolean[]>>({
-    A: Array(5).fill(false),
-    B: Array(5).fill(false),
+  // โหลดสถานะต่างๆ จาก sessionStorage เพื่อให้เวลารีเฟรชแล้วข้อมูลไม่หายและยังอยู่หน้าเดิม
+  const [active, setActive] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('lab_active_step')
+      return saved ? Number(saved) : 1
+    }
+    return 1
   })
-  const [graphed, setGraphed] = useState(false)
-  const [showHousehold, setShowHousehold] = useState(false)
-  const [showCompletion, setShowCompletion] = useState(false)
 
-  // เริ่มต้นเป็นวัตถุว่างเปล่า เพื่อไม่ให้มีผลงานค้างหรือปุ่มจบหลักสูตรโผล่ขึ้นมาก่อน
-  const [householdTestedMap, setHouseholdTestedMap] = useState<Record<string, boolean>>({})
-
-  const [randomDistances] = useState<Record<SetId, number[]>>({
-    A: generateRandomDistances(),
-    B: generateRandomDistances(),
+  const [extracted, setExtracted] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('lab_extracted') === 'true'
+    }
+    return false
   })
+
+  const [coated, setCoated] = useState<Record<SetId, boolean>>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('lab_coated')
+      if (saved) return JSON.parse(saved)
+    }
+    return { A: false, B: false }
+  })
+
+  const [tested, setTested] = useState<Record<SetId, boolean[]>>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('lab_tested')
+      if (saved) return JSON.parse(saved)
+    }
+    return { A: Array(5).fill(false), B: Array(5).fill(false) }
+  })
+
+  const [graphed, setGraphed] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('lab_graphed') === 'true'
+    }
+    return false
+  })
+
+  const [currentView, setCurrentView] = useState<'lab' | 'household' | 'completion'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('lab_current_view')
+      if (saved === 'household' || saved === 'completion' || saved === 'lab') return saved
+    }
+    return 'lab'
+  })
+
+  const [householdTestedMap, setHouseholdTestedMap] = useState<Record<string, boolean>>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = sessionStorage.getItem('lab_household_tested')
+        if (saved) return JSON.parse(saved)
+      } catch (e) {
+        // ignore
+      }
+    }
+    return {}
+  })
+
+  const [randomDistances] = useState<Record<SetId, number[]>>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = sessionStorage.getItem('lab_random_distances')
+        if (saved) return JSON.parse(saved)
+      } catch (e) {
+        // ignore
+      }
+    }
+    const dists = {
+      A: generateRandomDistances(),
+      B: generateRandomDistances(),
+    }
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('lab_random_distances', JSON.stringify(dists))
+    }
+    return dists
+  })
+
+  // บันทึกลง sessionStorage ทุกครั้งที่สถานะเปลี่ยน เพื่อป้องกันข้อมูลหายเวลา Refresh
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('lab_active_step', String(active))
+      sessionStorage.setItem('lab_extracted', String(extracted))
+      sessionStorage.setItem('lab_coated', JSON.stringify(coated))
+      sessionStorage.setItem('lab_tested', JSON.stringify(tested))
+      sessionStorage.setItem('lab_graphed', String(graphed))
+      sessionStorage.setItem('lab_current_view', currentView)
+      sessionStorage.setItem('lab_household_tested', JSON.stringify(householdTestedMap))
+    }
+  }, [active, extracted, coated, tested, graphed, currentView, householdTestedMap])
+
+  // รองรับปุ่ม Back / Forward ของ Browser ให้สอดคล้องกับ view และ step
+  useEffect(() => {
+    function handlePopState(event: PopStateEvent) {
+      if (event.state) {
+        if (event.state.view) setCurrentView(event.state.view)
+        if (event.state.step) setActive(event.state.step)
+      }
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
+
+  function changeView(view: 'lab' | 'household' | 'completion', targetStep = active) {
+    setCurrentView(view)
+    setActive(targetStep)
+    if (typeof window !== 'undefined') {
+      window.history.pushState({ view, step: targetStep }, '')
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  function goTo(step: number) {
+    setActive(step)
+    if (typeof window !== 'undefined') {
+      window.history.pushState({ view: 'lab', step }, '')
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   const completed = [
     extracted,
@@ -52,33 +153,25 @@ export function VirtualLab() {
     graphed,
   ]
 
-  // ตรวจสอบว่าผู้เล่นทดสอบสารในครัวเรือนครบทั้ง 4 ตัวจริงๆ แล้วหรือไม่
   const isHouseholdFullyCompleted = 
     householdTestedMap['vinegar'] === true &&
     householdTestedMap['lime'] === true &&
     householdTestedMap['baking-soda'] === true &&
     householdTestedMap['soapy-water'] === true
 
-  function goTo(step: number) {
-    setShowHousehold(false)
-    setShowCompletion(false)
-    setActive(step)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  // หากอยู่ในหน้าจบหลักสูตร (เรียกใช้งานผ่านคอมโพเนนต์แยก step-completion.tsx)
-  if (showCompletion) {
+  // หากอยู่ในหน้าจบหลักสูตร
+  if (currentView === 'completion') {
     return (
       <div className="flex min-h-dvh flex-col">
         <SiteHeader />
-        <StepCompletion onBack={() => setShowCompletion(false)} />
+        <StepCompletion onBack={() => changeView('lab', 4)} />
         <SiteFooter />
       </div>
     )
   }
 
   // หากอยู่ในหน้าทดสอบสารในครัวเรือน
-  if (showHousehold) {
+  if (currentView === 'household') {
     return (
       <div className="flex min-h-dvh flex-col">
         <SiteHeader />
@@ -86,7 +179,7 @@ export function VirtualLab() {
           <StepHousehold
             testedMap={householdTestedMap}
             setTestedMap={setHouseholdTestedMap}
-            onBack={() => setShowHousehold(false)}
+            onBack={() => changeView('lab', 4)}
           />
         </main>
         <SiteFooter />
@@ -132,14 +225,13 @@ export function VirtualLab() {
             />
             {graphed && (
               <div className="mt-6 flex flex-col items-center gap-3">
-                <Button size="lg" className="gap-2 bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-lg hover:from-orange-700 hover:to-amber-700" onClick={() => setShowHousehold(true)}>
+                <Button size="lg" className="gap-2 bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-lg hover:from-orange-700 hover:to-amber-700" onClick={() => changeView('household')}>
                   <Beaker className="size-5" />
                   ไปสู่การทดลองพิเศษ: สารในครัวเรือน (Household Testing)
                 </Button>
 
-                {/* ปุ่มจบหลักสูตรจะแสดงขึ้นมาก็ต่อเมื่อทำในครัวครบแล้วและกดกลับมาหน้าหลักเท่านั้น */}
                 {isHouseholdFullyCompleted && (
-                  <Button size="lg" variant="default" className="gap-2 bg-green-600 text-white hover:bg-green-700 shadow-lg animate-bounce" onClick={() => setShowCompletion(true)}>
+                  <Button size="lg" variant="default" className="gap-2 bg-green-600 text-white hover:bg-green-700 shadow-lg animate-bounce" onClick={() => changeView('completion')}>
                     <Award className="size-5" />
                     🎓 จบหลักสูตร / ดูใบประกาศนียบัตร & ใบงาน
                   </Button>
