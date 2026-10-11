@@ -8,43 +8,43 @@ import { cn } from '@/lib/utils'
 import { mixHex } from '@/lib/lab'
 
 const HOUSEHOLD_SAMPLES = [
-  {
+{
     id: 'vinegar',
     name: 'น้ำส้มสายชู (Vinegar)',
     type: 'กรดอ่อน',
     baseSetId: 'A',
-    basePaperColor: '#c8102e',
-    finalColor: '#f6b319',
-    distance: 15,
+    basePaperColor: '#ff1a1a',
+    finalColor: '#f6b319', 
+    distance: 15
     chemDesc: 'มีกรดแอซีติก (Acetic acid) เป็นองค์ประกอบ มีฤทธิ์เป็นกรดอ่อน ทำปฏิกิริยากับเบสที่เคลือบไว้บนกระดาษ ทำให้กระดาษสีแดงเปลี่ยนเป็นสีเหลือง'
   },
-  {
+{
     id: 'lime',
     name: 'น้ำมะนาว (Lime juice)',
     type: 'กรดอ่อน',
     baseSetId: 'A',
-    basePaperColor: '#c8102e',
+    basePaperColor: '#ff1a1a',
     finalColor: '#f59e0b',
     distance: 18,
     chemDesc: 'มีกรดซิตริก (Citric acid) มีฤทธิ์เป็นกรด ทำปฏิกิริยาสะเทินกับเบสบนกระดาษ ทำให้กระดาษสีแดงเปลี่ยนเป็นสีเหลือง-ส้ม'
   },
-  {
+{
     id: 'baking-soda',
     name: 'เบกกิ้งโซดา (Baking soda)',
     type: 'เบสอ่อน',
     baseSetId: 'B',
     basePaperColor: '#f2c230',
-    finalColor: '#8e1b5b',
+    finalColor: '#e60000',
     distance: 28,
-    chemDesc: 'มีฤทธิ์เป็นเบสอ่อน ทำปฏิกิริยากับกรดที่เคลือบไว้บนกระดาษ ทำให้กระดาษสีเหลืองเปลี่ยนเป็นสีแดง (โทนม่วงแดง)'
+    chemDesc: 'มีฤทธิ์เป็นเบสอ่อน ทำปฏิกิริยากับกรดที่เคลือบไว้บนกระดาษ ทำให้กระดาษสีเหลืองเปลี่ยนเป็นสีแดง'
   },
-  {
+{
     id: 'soapy-water',
     name: 'น้ำสบู่ (Soapy water)',
     type: 'เบสอ่อน',
     baseSetId: 'B',
     basePaperColor: '#f2c230',
-    finalColor: '#701a75',
+    finalColor: '#e60000',
     distance: 22,
     chemDesc: 'มีฤทธิ์เป็นเบส ทำปฏิกิริยากับกรดที่เคลือบไว้บนกระดาษ ทำให้กระดาษสีเหลืองเปลี่ยนเป็นสีแดง'
   },
