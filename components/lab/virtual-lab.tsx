@@ -1,317 +1,247 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { CONCENTRATIONS, type SetId } from '@/lib/lab'
+import { cn } from '@/lib/utils'
+import { SiteFooter } from './site-footer'
+import { SiteHeader } from './site-header'
+import { StepCoating } from './step-coating'
+import { StepExtraction } from './step-extraction'
+import { StepMeasurement } from './step-measurement'
+import { StepNav } from './step-nav'
+import { StepTesting } from './step-testing'
+import { StepHousehold } from './step-household'
+import { StepCompletion } from './step-completion'
 import { Button } from '@/components/ui/button'
-import { Award, FileText, Mail, Phone, User, ArrowLeft, CheckCircle2, Gift, Loader2 } from 'lucide-react'
+import { Beaker, Award } from 'lucide-react'
 
-type StepCompletionProps = {
-  onBack: () => void
+function generateRandomDistances() {
+  const distances: number[] = []
+  let current = Math.floor(Math.random() * 6) + 12
+  for (let i = 0; i < CONCENTRATIONS.length; i++) {
+    distances.push(current)
+    current += Math.floor(Math.random() * 5) + 8
+  }
+  return distances
 }
 
-export function StepCompletion({ onBack }: StepCompletionProps) {
-  const [formData, setFormData] = useState({
-    name: '',
-    contactType1: 'IG',
-    contactValue1: '',
-    contactType2: 'Facebook',
-    contactValue2: '',
-    school: '',
+export function VirtualLab() {
+  // โหลดสถานะต่างๆ จาก sessionStorage เพื่อให้เวลารีเฟรชแล้วข้อมูลไม่หายและยังอยู่หน้าเดิม
+  const [active, setActive] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('lab_active_step')
+      return saved ? Number(saved) : 1
+    }
+    return 1
   })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSubmitted, setIsSubmitted] = useState(false)
 
-  useEffect(() => {
+  const [extracted, setExtracted] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('lab_extracted') === 'true'
+    }
+    return false
+  })
+
+  const [coated, setCoated] = useState<Record<SetId, boolean>>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('lab_coated')
+      if (saved) return JSON.parse(saved)
+    }
+    return { A: false, B: false }
+  })
+
+  const [tested, setTested] = useState<Record<SetId, boolean[]>>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('lab_tested')
+      if (saved) return JSON.parse(saved)
+    }
+    return { A: Array(5).fill(false), B: Array(5).fill(false) }
+  })
+
+  const [graphed, setGraphed] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('lab_graphed') === 'true'
+    }
+    return false
+  })
+
+  const [currentView, setCurrentView] = useState<'lab' | 'household' | 'completion'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('lab_current_view')
+      if (saved === 'household' || saved === 'completion' || saved === 'lab') return saved
+    }
+    return 'lab'
+  })
+
+  const [householdTestedMap, setHouseholdTestedMap] = useState<Record<string, boolean>>(() => {
     if (typeof window !== 'undefined') {
       try {
-        const saved = sessionStorage.getItem('lab_certificate_session')
-        if (saved) {
-          const parsed = JSON.parse(saved)
-          if (parsed.name && parsed.school) {
-            setFormData(parsed)
-            setIsSubmitted(true)
-          }
-        }
+        const saved = sessionStorage.getItem('lab_household_tested')
+        if (saved) return JSON.parse(saved)
       } catch (e) {
-        console.error(e)
+        // ignore
       }
     }
+    return {}
+  })
+
+  const [randomDistances] = useState<Record<SetId, number[]>>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = sessionStorage.getItem('lab_random_distances')
+        if (saved) return JSON.parse(saved)
+      } catch (e) {
+        // ignore
+      }
+    }
+    const dists = {
+      A: generateRandomDistances(),
+      B: generateRandomDistances(),
+    }
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('lab_random_distances', JSON.stringify(dists))
+    }
+    return dists
+  })
+
+  // บันทึกลง sessionStorage ทุกครั้งที่สถานะเปลี่ยน เพื่อป้องกันข้อมูลหายเวลา Refresh
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('lab_active_step', String(active))
+      sessionStorage.setItem('lab_extracted', String(extracted))
+      sessionStorage.setItem('lab_coated', JSON.stringify(coated))
+      sessionStorage.setItem('lab_tested', JSON.stringify(tested))
+      sessionStorage.setItem('lab_graphed', String(graphed))
+      sessionStorage.setItem('lab_current_view', currentView)
+      sessionStorage.setItem('lab_household_tested', JSON.stringify(householdTestedMap))
+    }
+  }, [active, extracted, coated, tested, graphed, currentView, householdTestedMap])
+
+  // รองรับปุ่ม Back / Forward ของ Browser ให้สอดคล้องกับ view และ step
+  useEffect(() => {
+    function handlePopState(event: PopStateEvent) {
+      if (event.state) {
+        if (event.state.view) setCurrentView(event.state.view)
+        if (event.state.step) setActive(event.state.step)
+      }
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
   }, [])
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
+  function changeView(view: 'lab' | 'household' | 'completion', targetStep = active) {
+    setCurrentView(view)
+    setActive(targetStep)
+    if (typeof window !== 'undefined') {
+      window.history.pushState({ view, step: targetStep }, '')
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!formData.name.trim() || !formData.school.trim() || !formData.contactValue1.trim()) {
-      alert('กรุณากรอกชื่อ ช่องทางติดต่อที่ 1 และโรงเรียน/สถาบันการศึกษาให้ครบถ้วน')
-      return
+  function goTo(step: number) {
+    setActive(step)
+    if (typeof window !== 'undefined') {
+      window.history.pushState({ view: 'lab', step }, '')
     }
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
-    setIsSubmitting(true)
+  const completed = [
+    extracted,
+    coated.A && coated.B,
+    tested.A.every(Boolean) && tested.B.every(Boolean),
+    graphed,
+  ]
 
-    try {
-      // สามารถเพิ่มโค้ดส่งข้อมูลไปกูเกิ้ลชีต หรือ Supabase ได้ที่นี่ ตัวอย่างเช่น:
-      /*
-      await fetch('/api/submit-reward', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      })
-      */
+  const isHouseholdFullyCompleted = 
+    householdTestedMap['vinegar'] === true &&
+    householdTestedMap['lime'] === true &&
+    householdTestedMap['baking-soda'] === true &&
+    householdTestedMap['soapy-water'] === true
 
-      if (typeof window !== 'undefined') {
-        sessionStorage.setItem('lab_certificate_session', JSON.stringify(formData))
-      }
-      setIsSubmitted(true)
-    } catch (error) {
-      console.error('Error submitting form:', error)
-      alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่อีกครั้ง')
-    } finally {
-      setIsSubmitting(false)
-    }
+  // หากอยู่ในหน้าจบหลักสูตร
+  if (currentView === 'completion') {
+    return (
+      <div className="flex min-h-dvh flex-col">
+        <SiteHeader />
+        <StepCompletion onBack={() => changeView('lab', 4)} />
+        <SiteFooter />
+      </div>
+    )
+  }
+
+  // หากอยู่ในหน้าทดสอบสารในครัวเรือน
+  if (currentView === 'household') {
+    return (
+      <div className="flex min-h-dvh flex-col">
+        <SiteHeader />
+        <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-6 md:px-6 md:py-8">
+          <StepHousehold
+            testedMap={householdTestedMap}
+            setTestedMap={setHouseholdTestedMap}
+            onBack={() => changeView('lab', 4)}
+          />
+        </main>
+        <SiteFooter />
+      </div>
+    )
   }
 
   return (
     <div className="flex min-h-dvh flex-col">
-      <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-4 py-8 md:px-6">
-        <div className="flex items-center justify-between">
-          <Button variant="outline" size="sm" onClick={onBack} className="gap-2">
-            <ArrowLeft className="size-4" /> กลับสู่หน้าแล็บ
-          </Button>
-          <h1 className="text-xl font-bold text-foreground">🎉 หน้าสรุปผลและจบหลักสูตร Virtual Lab</h1>
-        </div>
+      <SiteHeader />
+      <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-6 md:px-6 md:py-8">
+        <StepNav active={active} completed={completed} onSelect={goTo} />
 
-        {/* ฟอร์มกรอกข้อมูลสำหรับสุ่มรับรางวัล / รับเกียรติบัตร */}
-        {!isSubmitted ? (
-          <section className="rounded-2xl border border-amber-500/30 bg-card p-6 shadow-lg relative overflow-hidden">
-            <div className="mb-4 flex items-center gap-3 border-b border-border pb-4">
-              <div className="rounded-xl bg-amber-500/10 p-2.5 text-amber-500">
-                <Gift className="size-6" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-foreground">กรอกข้อมูลสำหรับสุ่มรับรางวัล & รับเกียรติบัตร</h3>
-                <p className="text-xs text-muted-foreground">
-                  กรุณากรอกข้อมูลให้ถูกต้อง เพื่อใช้สำหรับสุ่มแจกของรางวัลและแสดงชื่อลงบนเกียรติบัตร
-                </p>
-              </div>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* ชื่อ - นามสกุล */}
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold text-foreground">
-                  ชื่อ - นามสกุล <span className="text-destructive">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  required
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="เช่น นายพชร ดวงอุปะ"
-                  className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-amber-500 focus:outline-none"
-                />
-              </div>
-
-              {/* ช่องทางติดต่อสะดวก 1 */}
-              <div className="grid gap-3 md:grid-cols-3">
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold text-foreground">
-                    ช่องทางติดต่อสะดวก 1 <span className="text-destructive">*</span>
-                  </label>
-                  <select
-                    name="contactType1"
-                    value={formData.contactType1}
-                    onChange={handleChange}
-                    className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground focus:border-amber-500 focus:outline-none"
-                  >
-                    <option value="IG">Instagram (IG)</option>
-                    <option value="Facebook">Facebook</option>
-                    <option value="Line">Line ID</option>
-                    <option value="Phone">เบอร์โทรศัพท์</option>
-                  </select>
-                </div>
-                <div className="md:col-span-2">
-                  <label className="mb-1.5 block text-xs font-semibold text-foreground">
-                    ชื่อบัญชี / ID / เบอร์โทรศัพท์ <span className="text-destructive">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="contactValue1"
-                    required
-                    value={formData.contactValue1}
-                    onChange={handleChange}
-                    placeholder="เช่น @p_.pxztt หรือ Phatchara Dounguapa"
-                    className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-amber-500 focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* ช่องทางติดต่อสะดวก 2 (สำรอง) */}
-              <div className="grid gap-3 md:grid-cols-3">
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">
-                    ช่องทางติดต่อสะดวก 2 (สำรอง)
-                  </label>
-                  <select
-                    name="contactType2"
-                    value={formData.contactType2}
-                    onChange={handleChange}
-                    className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground focus:border-amber-500 focus:outline-none"
-                  >
-                    <option value="Facebook">Facebook</option>
-                    <option value="IG">Instagram (IG)</option>
-                    <option value="Line">Line ID</option>
-                    <option value="Phone">เบอร์โทรศัพท์</option>
-                  </select>
-                </div>
-                <div className="md:col-span-2">
-                  <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">
-                    ชื่อบัญชี / ID / เบอร์โทรศัพท์ (ถ้ามี)
-                  </label>
-                  <input
-                    type="text"
-                    name="contactValue2"
-                    value={formData.contactValue2}
-                    onChange={handleChange}
-                    placeholder="เช่น 099-302-1693"
-                    className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-amber-500 focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* โรงเรียน / สถาบันการศึกษา */}
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold text-foreground">
-                  โรงเรียน / สถาบันการศึกษา <span className="text-destructive">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="school"
-                  required
-                  value={formData.school}
-                  onChange={handleChange}
-                  placeholder="เช่น โรงเรียนหาดใหญ่วิทยาลัยสมบูรณ์กุลกันยา"
-                  className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-amber-500 focus:outline-none"
-                />
-              </div>
-
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-amber-600 text-white hover:bg-amber-700 py-3 font-bold gap-2 text-base shadow-md"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="size-5 animate-spin" /> กำลังบันทึกข้อมูล...
-                  </>
-                ) : (
-                  <>
-                    <Gift className="size-5" /> ยืนยันข้อมูลสุ่มรับรางวัล & รับเกียรติบัตร
-                  </>
-                )}
-              </Button>
-            </form>
-          </section>
-        ) : (
-          /* แสดงเกียรติบัตรหลังจากลงทะเบียนสำเร็จ */
-          <section className="relative overflow-hidden rounded-2xl border-4 border-amber-500/40 bg-card p-8 text-center shadow-2xl md:p-12">
-            <div className="absolute right-4 top-4 rounded-full bg-amber-500/10 p-3">
-              <Award className="size-10 text-amber-500" />
-            </div>
-
-            <div className="mb-2 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest text-amber-500">
-              <CheckCircle2 className="size-4" /> Certificate of Completion
-            </div>
-
-            <h2 className="text-2xl font-serif font-bold text-foreground md:text-3xl">ใบประกาศนียบัตรฉบับนี้ให้ไว้เพื่อแสดงว่า</h2>
-
-            <div className="my-6">
-              <p className="text-3xl font-bold tracking-wide text-primary underline decoration-amber-500/50 underline-offset-8 md:text-4xl">
-                {formData.name}
-              </p>
-            </div>
-
-            <p className="mx-auto max-w-xl text-sm text-muted-foreground md:text-base">
-              ได้ผ่านการทดลองและปฏิบัติการเสมือนจริง (Virtual Lab) เรื่อง{' '}
-              <strong className="text-foreground">
-                ชุดกระดาษทดสอบจำแนกความเข้มข้นของสารด้วยระยะทางการเคลื่อนที่บนกระดาษจากสารสกัดแก่นฝาง
-              </strong>{' '}
-              สำเร็จลุล่วงตามหลักสูตร
-            </p>
-
-            <div className="my-6 inline-block rounded-xl border border-amber-500/30 bg-amber-500/5 px-6 py-3">
-              <p className="text-xs font-semibold text-amber-600 dark:text-amber-400">สถาบัน / โครงการพัฒนา:</p>
-              <p className="text-sm font-bold text-foreground">{formData.school}</p>
-            </div>
-
-            <div className="mt-4 text-xs text-muted-foreground">
-              ✨ ลงทะเบียนร่วมสุ่มรับของรางวัลเรียบร้อยแล้ว (ช่องทางติดต่อ: {formData.contactType1}: {formData.contactValue1})
-            </div>
+        <section className={cn(active !== 1 && 'hidden')} aria-label="ขั้นตอนที่ 1">
+          <StepExtraction done={extracted} onComplete={() => setExtracted(true)} onNext={() => goTo(2)} />
+        </section>
+        {completed[0] && (
+          <section className={cn(active !== 2 && 'hidden')} aria-label="ขั้นตอนที่ 2">
+            <StepCoating
+              done={coated}
+              onSetComplete={(set) => setCoated((prev) => ({ ...prev, [set]: true }))}
+              onNext={() => goTo(3)}
+            />
           </section>
         )}
+        {completed[1] && (
+          <section className={cn(active !== 3 && 'hidden')} aria-label="ขั้นตอนที่ 3">
+            <StepTesting
+              tested={tested}
+              distances={randomDistances}
+              onTest={(set, index) =>
+                setTested((prev) => ({ ...prev, [set]: prev[set].map((v, i) => (i === index ? true : v)) }))
+              }
+              onNext={() => goTo(4)}
+            />
+          </section>
+        )}
+        {completed[2] && (
+          <section className={cn(active !== 4 && 'hidden')} aria-label="ขั้นตอนที่ 4">
+            <StepMeasurement
+              distances={randomDistances}
+              onComplete={() => setGraphed(true)}
+            />
+            {graphed && (
+              <div className="mt-6 flex flex-col items-center gap-3">
+                <Button size="lg" className="gap-2 bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-lg hover:from-orange-700 hover:to-amber-700" onClick={() => changeView('household')}>
+                  <Beaker className="size-5" />
+                  ไปสู่การทดลองพิเศษ: สารในครัวเรือน (Household Testing)
+                </Button>
 
-        {/* ส่วนที่ 3: เอกสารใบงาน (Worksheet) */}
-        <section className="rounded-2xl border border-border bg-card p-6 shadow-md">
-          <div className="mb-4 flex items-center gap-3">
-            <FileText className="size-6 text-primary" />
-            <h3 className="text-lg font-semibold text-foreground">เอกสารใบงานการทดลอง (Worksheet & Reports)</h3>
-          </div>
-          <p className="mb-4 text-sm text-muted-foreground">ดาวน์โหลดเอกสารเพื่อใช้ประกอบการทำรายงาน</p>
-
-          <a
-            href="/worksheet.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-            download="Worksheet-VirtualLab.pdf"
-          >
-            <Button variant="outline" className="gap-2 cursor-pointer">
-              📄 ดาวน์โหลดไฟล์ใบงานสรุปผลการทดลอง (.PDF)
-            </Button>
-          </a>
-        </section>
-
-        {/* ส่วนที่ 4: ข้อมูลผู้พัฒนา */}
-        <section className="rounded-2xl border border-border bg-card p-6 shadow-md">
-          <div className="mb-4 flex items-center gap-3">
-            <User className="size-6 text-primary" />
-            <h3 className="text-lg font-semibold text-foreground">ข้อมูลผู้พัฒนาโครงการ (Developer Contacts)</h3>
-          </div>
-          <div className="grid gap-3 text-sm text-muted-foreground md:grid-cols-2">
-            <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-muted/30 p-3">
-              <User className="size-4 text-primary" />
-              <span>ผู้พัฒนา: พชร ดวงอุปะ (เพชร) - ม.6/2</span>
-            </div>
-            <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-muted/30 p-3">
-              <span className="text-xs font-semibold text-primary">โรงเรียน:</span>
-              <span>หาดใหญ่วิทยาลัยสมบูรณ์กุลกันยา (Hatyaiwittayalaisomboonkulkanya School)</span>
-            </div>
-            <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-muted/30 p-3">
-              <Mail className="size-4 text-primary" />
-              <span>อีเมลติดต่อ: petcchyy9@gmail.com</span>
-            </div>
-            <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-muted/30 p-3">
-              <Phone className="size-4 text-primary" />
-              <span>โทรศัพท์: 099-302-1693</span>
-            </div>
-            <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-muted/30 p-3">
-              <svg className="size-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
-              </svg>
-              <span>Facebook: Phatchara Dounguapa</span>
-            </div>
-            <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-muted/30 p-3">
-              <svg className="size-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
-                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
-                <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
-              </svg>
-              <span>Instagram: @p_.pxztt</span>
-            </div>
-          </div>
-        </section>
+                {isHouseholdFullyCompleted && (
+                  <Button size="lg" variant="default" className="gap-2 bg-green-600 text-white hover:bg-green-700 shadow-lg animate-bounce" onClick={() => changeView('completion')}>
+                    <Award className="size-5" />
+                    🎓 จบหลักสูตร / ดูใบประกาศนียบัตร & ใบงาน
+                  </Button>
+                )}
+              </div>
+            )}
+          </section>
+        )}
       </main>
+      <SiteFooter />
     </div>
   )
 }
