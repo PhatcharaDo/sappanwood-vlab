@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { Award, FileText, Mail, Phone, User, ArrowLeft, CheckCircle2, Gift, Loader2 } from 'lucide-react'
+import { Award, FileText, Mail, Phone, User, ArrowLeft, CheckCircle2, Gift, Loader2, MessageSquare } from 'lucide-react'
 
 type StepCompletionProps = {
   onBack: () => void
@@ -16,6 +16,7 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
     contactType2: 'Facebook',
     contactValue2: '',
     school: '',
+    feedback: '',
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
@@ -37,7 +38,7 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
     }
   }, [])
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
@@ -51,7 +52,6 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
     setIsSubmitting(true)
 
     try {
-// ส่งข้อมูลไปยัง Google Sheets ผ่าน Web App URL ใหม่
       await fetch(
         'https://script.google.com/macros/s/AKfycbze1DPj2LvL0BdHjjyubEQkvpV3GE1Iv-aT2EzXwL_rtAuj4LwY7zxLWOnSJxuY2u5tPA/exec',
         {
@@ -94,7 +94,7 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
               <div>
                 <h3 className="text-lg font-bold text-foreground">กรอกข้อมูลสำหรับสุ่มรับรางวัล & รับเกียรติบัตร</h3>
                 <p className="text-xs text-muted-foreground">
-                  กรุณากรอกข้อมูลให้ถูกต้อง เพื่อใช้สำหรับสุ่มแจกของรางวัลและแสดงชื่อลงบนเกียรติบัตร
+                  กรุณากรอกข้อมูลให้ถูกต้อง เพื่อใช้สำหรับสุ่มแจกของรางวัล แสดงชื่อบนเกียรติบัตร และประเมินข้อเสนอแนะ
                 </p>
               </div>
             </div>
@@ -196,6 +196,22 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
                   onChange={handleChange}
                   placeholder="เช่น โรงเรียนหาดใหญ่วิทยาลัยสมบูรณ์กุลกันยา"
                   className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-amber-500 focus:outline-none"
+                />
+              </div>
+
+              {/* ข้อเสนอแนะ / ความคิดเห็นเพิ่มเติม */}
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold text-foreground flex items-center gap-1.5">
+                  <MessageSquare className="size-3.5 text-amber-500" />
+                  ข้อเสนอแนะ / ความคิดเห็นต่อการใช้งาน Virtual Lab (ถ้ามี)
+                </label>
+                <textarea
+                  name="feedback"
+                  rows={3}
+                  value={formData.feedback}
+                  onChange={handleChange}
+                  placeholder="แสดงความคิดเห็น ข้อเสนอแนะ หรือความประทับใจจากการใช้งานแล็บเสมือนจริง..."
+                  className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-amber-500 focus:outline-none resize-none"
                 />
               </div>
 
