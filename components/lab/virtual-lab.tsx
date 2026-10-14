@@ -26,6 +26,7 @@ function generateRandomDistances() {
 }
 
 export function VirtualLab() {
+  // โหลดขั้นตอนหลัก (1-4) จาก sessionStorage
   const [active, setActive] = useState<number>(() => {
     if (typeof window !== 'undefined') {
       const saved = sessionStorage.getItem('lab_active_step')
@@ -34,31 +35,82 @@ export function VirtualLab() {
     return 1
   })
 
-  // Dev Bypass: บังคับถือว่าผ่านทุกขั้นตอนแล้ว
-  const [devBypass, setDevBypass] = useState<boolean>(true)
-
-  const [extracted, setExtracted] = useState<boolean>(true)
-  const [coated, setCoated] = useState<Record<SetId, boolean>>({ A: true, B: true })
-  const [tested, setTested] = useState<Record<SetId, boolean[]>>({
-    A: Array(5).fill(true),
-    B: Array(5).fill(true),
-  })
-  const [graphed, setGraphed] = useState<boolean>(true)
-
-  const [currentView, setCurrentView] = useState<'lab' | 'household' | 'completion'>('lab')
-
-  const [householdTestedMap, setHouseholdTestedMap] = useState<Record<string, boolean>>({
-    vinegar: true,
-    lime: true,
-    'baking-soda': true,
-    'soapy-water': true,
+  // โหลดหน้าปัจจุบัน (lab / household / completion) จาก sessionStorage
+  const [currentView, setCurrentView] = useState<'lab' | 'household' | 'completion'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('lab_current_view')
+      if (saved === 'household' || saved === 'completion' || saved === 'lab') return saved
+    }
+    return 'lab'
   })
 
-  const [randomDistances] = useState<Record<SetId, number[]>>({
-    A: [12, 20, 28, 35, 42],
-    B: [14, 22, 29, 36, 45],
+  // Dev Bypass Flag
+  const [devBypass] = useState<boolean>(true)
+
+  const [extracted, setExtracted] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') return sessionStorage.getItem('lab_extracted') === 'true'
+    return true
   })
 
+  const [coated, setCoated] = useState<Record<SetId, boolean>>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('lab_coated')
+      if (saved) return JSON.parse(saved)
+    }
+    return { A: true, B: true }
+  })
+
+  const [tested, setTested] = useState<Record<SetId, boolean[]>>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('lab_tested')
+      if (saved) return JSON.parse(saved)
+    }
+    return { A: Array(5).fill(true), B: Array(5).fill(true) }
+  })
+
+  const [graphed, setGraphed] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') return sessionStorage.getItem('lab_graphed') === 'true'
+    return true
+  })
+
+  const [householdTestedMap, setHouseholdTestedMap] = useState<Record<string, boolean>>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = sessionStorage.getItem('lab_household_tested')
+        if (saved) return JSON.parse(saved)
+      } catch (e) {
+        // ignore
+      }
+    }
+    return { vinegar: true, lime: true, 'baking-soda': true, 'soapy-water': true }
+  })
+
+  const [randomDistances] = useState<Record<SetId, number[]>>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = sessionStorage.getItem('lab_random_distances')
+        if (saved) return JSON.parse(saved)
+      } catch (e) {
+        // ignore
+      }
+    }
+    return { A: [12, 20, 28, 35, 42], B: [14, 22, 29, 36, 45] }
+  })
+
+  // บันทึกค่าลง sessionStorage สม่ำเสมอเพื่อรองรับการกด Refresh (รีเฟรชแล้วอยู่หน้าเดิมพร้อมข้อมูลเดิม)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('lab_active_step', String(active))
+      sessionStorage.setItem('lab_current_view', currentView)
+      sessionStorage.setItem('lab_extracted', String(extracted))
+      sessionStorage.setItem('lab_coated', JSON.stringify(coated))
+      sessionStorage.setItem('lab_tested', JSON.stringify(tested))
+      sessionStorage.setItem('lab_graphed', String(graphed))
+      sessionStorage.setItem('lab_household_tested', JSON.stringify(householdTestedMap))
+    }
+  }, [active, currentView, extracted, coated, tested, graphed, householdTestedMap])
+
+  // จัดการการกดย้อนกลับ / ถอยหลัง ของบราวเซอร์ (Browser Back / Forward)
   useEffect(() => {
     function handlePopState(event: PopStateEvent) {
       if (event.state) {
@@ -87,7 +139,12 @@ export function VirtualLab() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const completed = [devBypass || extracted, devBypass || (coated.A && coated.B), devBypass || (tested.A.every(Boolean) && tested.B.every(Boolean)), devBypass || graphed]
+  const completed = [
+    devBypass || extracted,
+    devBypass || (coated.A && coated.B),
+    devBypass || (tested.A.every(Boolean) && tested.B.every(Boolean)),
+    devBypass || graphed,
+  ]
 
   if (currentView === 'completion') {
     return (
