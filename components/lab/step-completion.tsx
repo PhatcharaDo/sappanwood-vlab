@@ -52,8 +52,9 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
     setIsSubmitting(true)
 
     try {
+     // ส่งข้อมูลไปยัง Google Sheets ผ่าน Web App URL ล่าสุด
       await fetch(
-        'https://script.google.com/macros/s/AKfycbze1DPj2LvL0BdHjjyubEQkvpV3GE1Iv-aT2EzXwL_rtAuj4LwY7zxLWOnSJxuY2u5tPA/exec',
+        'https://script.google.com/macros/s/AKfycbxMs0yqfRbDj4r9H77KD6TKc5as41CUJcgRDtx9UYNUFH2wWZ4b1XnryqtrYND5Ms8g_Q/exec',
         {
           method: 'POST',
           mode: 'no-cors',
