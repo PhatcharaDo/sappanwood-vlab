@@ -13,7 +13,7 @@ import { StepTesting } from './step-testing'
 import { StepHousehold } from './step-household'
 import { StepCompletion } from './step-completion'
 import { Button } from '@/components/ui/button'
-import { Beaker, Award, Unlock } from 'lucide-react'
+import { Beaker, Award } from 'lucide-react'
 
 function generateRandomDistances() {
   const distances: number[] = []
@@ -26,7 +26,6 @@ function generateRandomDistances() {
 }
 
 export function VirtualLab() {
-  // โหลดขั้นตอนหลัก (1-4) จาก sessionStorage
   const [active, setActive] = useState<number>(() => {
     if (typeof window !== 'undefined') {
       const saved = sessionStorage.getItem('lab_active_step')
@@ -35,7 +34,6 @@ export function VirtualLab() {
     return 1
   })
 
-  // โหลดหน้าปัจจุบัน (lab / household / completion) จาก sessionStorage
   const [currentView, setCurrentView] = useState<'lab' | 'household' | 'completion'>(() => {
     if (typeof window !== 'undefined') {
       const saved = sessionStorage.getItem('lab_current_view')
@@ -44,12 +42,11 @@ export function VirtualLab() {
     return 'lab'
   })
 
-  // Dev Bypass Flag
-  const [devBypass] = useState<boolean>(true)
-
   const [extracted, setExtracted] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') return sessionStorage.getItem('lab_extracted') === 'true'
-    return true
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('lab_extracted') === 'true'
+    }
+    return false
   })
 
   const [coated, setCoated] = useState<Record<SetId, boolean>>(() => {
@@ -57,7 +54,7 @@ export function VirtualLab() {
       const saved = sessionStorage.getItem('lab_coated')
       if (saved) return JSON.parse(saved)
     }
-    return { A: true, B: true }
+    return { A: false, B: false }
   })
 
   const [tested, setTested] = useState<Record<SetId, boolean[]>>(() => {
@@ -65,12 +62,14 @@ export function VirtualLab() {
       const saved = sessionStorage.getItem('lab_tested')
       if (saved) return JSON.parse(saved)
     }
-    return { A: Array(5).fill(true), B: Array(5).fill(true) }
+    return { A: Array(5).fill(false), B: Array(5).fill(false) }
   })
 
   const [graphed, setGraphed] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') return sessionStorage.getItem('lab_graphed') === 'true'
-    return true
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('lab_graphed') === 'true'
+    }
+    return false
   })
 
   const [householdTestedMap, setHouseholdTestedMap] = useState<Record<string, boolean>>(() => {
@@ -82,7 +81,7 @@ export function VirtualLab() {
         // ignore
       }
     }
-    return { vinegar: true, lime: true, 'baking-soda': true, 'soapy-water': true }
+    return {}
   })
 
   const [randomDistances] = useState<Record<SetId, number[]>>(() => {
@@ -94,10 +93,17 @@ export function VirtualLab() {
         // ignore
       }
     }
-    return { A: [12, 20, 28, 35, 42], B: [14, 22, 29, 36, 45] }
+    const dists = {
+      A: generateRandomDistances(),
+      B: generateRandomDistances(),
+    }
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('lab_random_distances', JSON.stringify(dists))
+    }
+    return dists
   })
 
-  // บันทึกค่าลง sessionStorage สม่ำเสมอเพื่อรองรับการกด Refresh (รีเฟรชแล้วอยู่หน้าเดิมพร้อมข้อมูลเดิม)
+  // บันทึกลง sessionStorage เมื่อสถานะเปลี่ยน
   useEffect(() => {
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('lab_active_step', String(active))
@@ -110,7 +116,7 @@ export function VirtualLab() {
     }
   }, [active, currentView, extracted, coated, tested, graphed, householdTestedMap])
 
-  // จัดการการกดย้อนกลับ / ถอยหลัง ของบราวเซอร์ (Browser Back / Forward)
+  // รองรับปุ่มย้อนกลับ/เดินหน้าของเบราว์เซอร์
   useEffect(() => {
     function handlePopState(event: PopStateEvent) {
       if (event.state) {
@@ -140,11 +146,17 @@ export function VirtualLab() {
   }
 
   const completed = [
-    devBypass || extracted,
-    devBypass || (coated.A && coated.B),
-    devBypass || (tested.A.every(Boolean) && tested.B.every(Boolean)),
-    devBypass || graphed,
+    extracted,
+    coated.A && coated.B,
+    tested.A.every(Boolean) && tested.B.every(Boolean),
+    graphed,
   ]
+
+  const isHouseholdFullyCompleted = 
+    householdTestedMap['vinegar'] === true &&
+    householdTestedMap['lime'] === true &&
+    householdTestedMap['baking-soda'] === true &&
+    householdTestedMap['soapy-water'] === true
 
   if (currentView === 'completion') {
     return (
@@ -176,59 +188,58 @@ export function VirtualLab() {
     <div className="flex min-h-dvh flex-col">
       <SiteHeader />
       <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-6 md:px-6 md:py-8">
-        {/* แถบแจ้งเตือน Dev Mode Bypass */}
-        <div className="flex items-center justify-between rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
-          <div className="flex items-center gap-2 text-sm font-semibold text-amber-600 dark:text-amber-400">
-            <Unlock className="size-4" />
-            โหมดทดสอบผู้พัฒนา (Developer Mode): ปลดล็อกทุกขั้นตอนแล้ว
-          </div>
-          <Button size="sm" variant="outline" onClick={() => changeView('completion')} className="gap-2 border-amber-500/40 text-amber-600 hover:bg-amber-500/10">
-            <Award className="size-4" /> ข้ามไปหน้าประกาศนียบัตร
-          </Button>
-        </div>
-
         <StepNav active={active} completed={completed} onSelect={goTo} />
 
         <section className={cn(active !== 1 && 'hidden')} aria-label="ขั้นตอนที่ 1">
           <StepExtraction done={extracted} onComplete={() => setExtracted(true)} onNext={() => goTo(2)} />
         </section>
 
-        <section className={cn(active !== 2 && 'hidden')} aria-label="ขั้นตอนที่ 2">
-          <StepCoating
-            done={coated}
-            onSetComplete={(set) => setCoated((prev) => ({ ...prev, [set]: true }))}
-            onNext={() => goTo(3)}
-          />
-        </section>
+        {completed[0] && (
+          <section className={cn(active !== 2 && 'hidden')} aria-label="ขั้นตอนที่ 2">
+            <StepCoating
+              done={coated}
+              onSetComplete={(set) => setCoated((prev) => ({ ...prev, [set]: true }))}
+              onNext={() => goTo(3)}
+            />
+          </section>
+        )}
 
-        <section className={cn(active !== 3 && 'hidden')} aria-label="ขั้นตอนที่ 3">
-          <StepTesting
-            tested={tested}
-            distances={randomDistances}
-            onTest={(set, index) =>
-              setTested((prev) => ({ ...prev, [set]: prev[set].map((v, i) => (i === index ? true : v)) }))
-            }
-            onNext={() => goTo(4)}
-          />
-        </section>
+        {completed[1] && (
+          <section className={cn(active !== 3 && 'hidden')} aria-label="ขั้นตอนที่ 3">
+            <StepTesting
+              tested={tested}
+              distances={randomDistances}
+              onTest={(set, index) =>
+                setTested((prev) => ({ ...prev, [set]: prev[set].map((v, i) => (i === index ? true : v)) }))
+              }
+              onNext={() => goTo(4)}
+            />
+          </section>
+        )}
 
-        <section className={cn(active !== 4 && 'hidden')} aria-label="ขั้นตอนที่ 4">
-          <StepMeasurement
-            distances={randomDistances}
-            onComplete={() => setGraphed(true)}
-          />
-          <div className="mt-6 flex flex-col items-center gap-3">
-            <Button size="lg" className="gap-2 bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-lg hover:from-orange-700 hover:to-amber-700" onClick={() => changeView('household')}>
-              <Beaker className="size-5" />
-              ไปสู่การทดลองพิเศษ: สารในครัวเรือน (Household Testing)
-            </Button>
+        {completed[2] && (
+          <section className={cn(active !== 4 && 'hidden')} aria-label="ขั้นตอนที่ 4">
+            <StepMeasurement
+              distances={randomDistances}
+              onComplete={() => setGraphed(true)}
+            />
+            {graphed && (
+              <div className="mt-6 flex flex-col items-center gap-3">
+                <Button size="lg" className="gap-2 bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-lg hover:from-orange-700 hover:to-amber-700" onClick={() => changeView('household')}>
+                  <Beaker className="size-5" />
+                  ไปสู่การทดลองพิเศษ: สารในครัวเรือน (Household Testing)
+                </Button>
 
-            <Button size="lg" variant="default" className="gap-2 bg-green-600 text-white hover:bg-green-700 shadow-lg" onClick={() => changeView('completion')}>
-              <Award className="size-5" />
-              🎓 จบหลักสูตร / ดูใบประกาศนียบัตร & ใบงาน
-            </Button>
-          </div>
-        </section>
+                {isHouseholdFullyCompleted && (
+                  <Button size="lg" variant="default" className="gap-2 bg-green-600 text-white hover:bg-green-700 shadow-lg animate-bounce" onClick={() => changeView('completion')}>
+                    <Award className="size-5" />
+                    🎓 จบหลักสูตร / ดูใบประกาศนียบัตร & ใบงาน
+                  </Button>
+                )}
+              </div>
+            )}
+          </section>
+        )}
       </main>
       <SiteFooter />
     </div>
