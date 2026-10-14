@@ -51,14 +51,16 @@ export function StepCompletion({ onBack }: StepCompletionProps) {
     setIsSubmitting(true)
 
     try {
-      // สามารถเพิ่มโค้ดส่งข้อมูลไปกูเกิ้ลชีต หรือ Supabase ได้ที่นี่ ตัวอย่างเช่น:
-      /*
-      await fetch('/api/submit-reward', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      })
-      */
+      // ส่งข้อมูลไปยัง Google Sheets ผ่าน Web App URL
+      await fetch(
+        'https://script.google.com/macros/s/AKfycbwoSEh6jDVTVpQeFEYgQP_IAaH43WYc9JnaxElRvynk5N-vVwukHE-lyuZChEekUFSeig/exec',
+        {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        }
+      )
 
       if (typeof window !== 'undefined') {
         sessionStorage.setItem('lab_certificate_session', JSON.stringify(formData))
